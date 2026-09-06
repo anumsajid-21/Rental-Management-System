@@ -1,0 +1,90 @@
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { authenticateUser, registerUser, fetchCurrentUser } from '../lib/userStore';
+import { ROLE_HOME } from '../lib/roles';
+
+const SESSION_KEY = 'rms_session';
+
+const AuthContext = createContext(null);
+
+function readSession() {
+  try {
+    return JSON.parse(localStorage.getItem(SESSION_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function AuthProvider({ children }) {
+  // Restore session synchronously so protected routes render correctly on
+  // the first paint after a refresh; the token is re-validated with the
+  // server immediately afterwards.
+  const [session, setSession] = useState(readSession);
+  const [user, setUser] = useState(session?.user || null);
+  const [loading, setLoading] = useState(false);
+
+  const persist = useCallback((next) => {
+    setSession(next);
+    setUser(next?.user || null);
+    if (next) localStorage.setItem(SESSION_KEY, JSON.stringify(next));
+    else localStorage.removeItem(SESSION_KEY);
+  }, []);
+
+  // Re-validate the stored token against the server on mount/refresh.
+  useEffect(() => {
+    const token = session?.token;
+    if (!token) return;
+    let cancelled = false;
+    fetchCurrentUser(token).then((fresh) => {
+      if (cancelled) return;
+      if (fresh) persist({ token, user: fresh });
+      else persist(null); // token invalid/expired → force sign-in
+    });
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const signUp = useCallback(async (payload) => {
+    setLoading(true);
+    try {
+      const result = await registerUser(payload);
+      if (result.ok) persist({ token: result.token, user: result.user });
+      return result;
+    } finally {
+      setLoading(false);
+    }
+  }, [persist]);
+
+  const signIn = useCallback(async (payload) => {
+    setLoading(true);
+    try {
+      const result = await authenticateUser(payload);
+      if (result.ok) persist({ token: result.token, user: result.user });
+      return result;
+    } finally {
+      setLoading(false);
+    }
+  }, [persist]);
+
+  const logout = useCallback(() => persist(null), [persist]);
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      token: session?.token || null,
+      isAuthenticated: Boolean(user),
+      signUp,
+      signIn,
+      logout,
+      homeForRole: (role) => ROLE_HOME[role] || '/',
+    }),
+    [user, session, loading, signUp, signIn, logout]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
+}

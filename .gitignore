@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Builds
+client/dist/
+
+# Environment & secrets (each teammate keeps their own)
+server/.env
+
+# Database files (local per-developer)
+server/data/
+
+# Misc
+.DS_Store
+*.local
+*.log
+
