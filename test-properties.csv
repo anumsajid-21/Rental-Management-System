@@ -1,0 +1,9 @@
+Property Name,Address,City,Property Type,Description,Bedrooms,Bathrooms,Monthly Rent,Status
+Gulberg Heights,45-C Main Boulevard Gulberg,Lahore,apartment,Newly built 3-bed with elevator,3,2,75000,available
+Sea Breeze Apartment,Khayaban-e-Bukhari DHA,Karachi,apartment,Sea-facing 2-bed with balcony,2,2,98000,occupied
+Rose Garden House,Model Town Block C,Lahore,house,Corner house with lawn,4,4,165000,available
+Mall Road Studio,The Mall Rawalpindi,Rawalpindi,studio,Serviced studio apartment,1,1,32000,available
+Business Center Office, Saddar Rawalpindi,Rawalpindi,office,Open-plan office space,0,2,110000,available
+Jinnah Super Shop,F-7 Markaz,Jinnah Super Islamabad,shop,Retail shop near supermarket,0,1,88000,occupied
+Bad Rent Row,Blocked Street 5,Lahore,house,This row has invalid rent,3,2,not_a_price,available
+,Missing Name Street 7,Karachi,apartment,This row is missing the name,2,1,55000,available

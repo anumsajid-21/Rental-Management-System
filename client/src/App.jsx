@@ -3,8 +3,27 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
-import TenantArea from './pages/TenantArea';
+import TenantLayout from './pages/tenant/TenantLayout';
+import TenantDashboard from './pages/tenant/TenantDashboard';
+import TenantProperties from './pages/tenant/TenantProperties';
+import TenantPropertyDetail from './pages/tenant/TenantPropertyDetail';
+import TenantRental from './pages/tenant/TenantRental';
+import TenantTransactions from './pages/tenant/TenantTransactions';
+import TenantTransactionDetail from './pages/tenant/TenantTransactionDetail';
+import TenantMaintenance from './pages/tenant/TenantMaintenance';
+import TenantMaintenanceNew from './pages/tenant/TenantMaintenanceNew';
+import TenantMaintenanceDetail from './pages/tenant/TenantMaintenanceDetail';
+import TenantProfile from './pages/tenant/TenantProfile';
 import OwnerArea from './pages/OwnerArea';
+import OwnerHome from './pages/owner/OwnerHome';
+import RentPage from './pages/owner/RentPage';
+import TransactionsPage from './pages/owner/TransactionsPage';
+import MaintenancePage from './pages/owner/MaintenancePage';
+import ReportsPage from './pages/owner/ReportsPage';
+import ImportCsvPage from './pages/owner/ImportCsvPage';
+import OwnerPropertiesPage from './pages/owner/OwnerPropertiesPage';
+import RentalRequestsPage from './pages/owner/RentalRequestsPage';
+import ProfilePage from './pages/owner/ProfilePage';
 import AdminArea from './pages/AdminArea';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -19,7 +38,7 @@ import { ROLES } from './lib/roles';
 
 /**
  * Route map. Role protection is declarative: pass `roles={[...]}`.
- * Adding the future admin portal is a single guarded route below.
+ * The tenant and owner portals are nested under their role-protected layouts.
  */
 export default function App() {
   return (
@@ -33,10 +52,21 @@ export default function App() {
             path="/tenant"
             element={
               <ProtectedRoute roles={[ROLES.TENANT]}>
-                <TenantArea />
+                <TenantLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<TenantDashboard />} />
+            <Route path="properties" element={<TenantProperties />} />
+            <Route path="properties/:propertyId" element={<TenantPropertyDetail />} />
+            <Route path="rental" element={<TenantRental />} />
+            <Route path="transactions" element={<TenantTransactions />} />
+            <Route path="transactions/:transactionId" element={<TenantTransactionDetail />} />
+            <Route path="maintenance" element={<TenantMaintenance />} />
+            <Route path="maintenance/new" element={<TenantMaintenanceNew />} />
+            <Route path="maintenance/:requestId" element={<TenantMaintenanceDetail />} />
+            <Route path="profile" element={<TenantProfile />} />
+          </Route>
           <Route
             path="/owner"
             element={
@@ -44,7 +74,17 @@ export default function App() {
                 <OwnerArea />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<OwnerHome />} />
+            <Route path="properties" element={<OwnerPropertiesPage />} />
+            <Route path="rental-requests" element={<RentalRequestsPage />} />
+            <Route path="rent" element={<RentPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="import" element={<ImportCsvPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
 
           <Route
             path="/admin"

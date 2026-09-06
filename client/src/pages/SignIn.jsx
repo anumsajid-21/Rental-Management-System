@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import TextField from '../components/TextField';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignIn() {
-  const { signIn, homeForRole } = useAuth();
+  const { signIn, homeForRole, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,6 +21,11 @@ export default function SignIn() {
     // Clear the location state so refresh/info doesn't reappear.
     window.history.replaceState({}, document.title);
   }, []);
+
+  // Already signed in? Go straight to the role's home area.
+  if (isAuthenticated) {
+    return <Navigate to={homeForRole(user.role)} replace />;
+  }
 
   const setField = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));

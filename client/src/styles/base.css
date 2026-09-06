@@ -104,3 +104,28 @@ body {
 }
 .alert-error { background: var(--danger-soft); color: var(--danger); border-color: rgba(176, 86, 63, 0.2); }
 .alert-info { background: var(--info-soft); color: var(--info-text); border-color: rgba(63, 106, 125, 0.2); }
+.alert-success { background: var(--accent-soft); color: var(--accent-dark); border-color: rgba(95, 141, 118, 0.25); }
+
+/* ---------- Selects & textareas (portal forms) ---------- */
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field select { height: 48px; cursor: pointer; }
+.field textarea { padding: 12px 16px; min-height: 120px; resize: vertical; line-height: 1.6; }
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(95, 141, 118, 0.15);
+}
+.field-error select,
+.field-error textarea { border-color: var(--danger); }

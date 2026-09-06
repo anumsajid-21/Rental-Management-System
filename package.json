@@ -9,6 +9,7 @@
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
     "init-db": "npm run init-db --prefix server",
+    "seed": "npm run seed --prefix server",
     "build": "npm run build --prefix client"
   },
   "devDependencies": {
