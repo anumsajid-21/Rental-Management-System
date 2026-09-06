@@ -9,11 +9,31 @@ const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const findByIdStmt = db.prepare('SELECT * FROM users WHERE id = ?');
 const emailExistsStmt = db.prepare('SELECT 1 FROM users WHERE email = ?');
 const insertStmt = db.prepare(
-  'INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)'
+  'INSERT INTO users (id, name, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)'
 );
+const updateStmt = db.prepare(
+  'UPDATE users SET name = ?, email = ?, role = ?, status = ? WHERE id = ?'
+);
+const updateStatusStmt = db.prepare(
+  'UPDATE users SET status = ? WHERE id = ?'
+);
+const listStmt = db.prepare(`
+  SELECT * FROM users 
+  WHERE (name LIKE ? OR email LIKE ? OR ? = '')
+    AND (? = '' OR role = ?)
+    AND (? = '' OR status = ?)
+  ORDER BY created_at DESC
+  LIMIT ? OFFSET ?
+`);
+const countStmt = db.prepare(`
+  SELECT COUNT(*) as count FROM users 
+  WHERE (name LIKE ? OR email LIKE ? OR ? = '')
+    AND (? = '' OR role = ?)
+    AND (? = '' OR status = ?)
+`);
 
 export function toPublicUser(row) {
-  return { id: row.id, name: row.name, email: row.email, role: row.role, createdAt: row.created_at };
+  return { id: row.id, name: row.name, email: row.email, role: row.role, status: row.status || 'active', createdAt: row.created_at };
 }
 
 export const userModel = {
@@ -24,7 +44,7 @@ export const userModel = {
   /**
    * @returns {{ ok: true, user: object } | { ok: false, error: string }}
    */
-  create({ name, email, password, role }) {
+  create({ name, email, password, role, status = 'active' }) {
     const normalized = email.trim().toLowerCase();
     if (!Object.values(ROLES).includes(role)) {
       return { ok: false, error: 'Invalid role selected.' };
@@ -34,7 +54,7 @@ export const userModel = {
     }
     const id = crypto.randomUUID();
     const hash = bcrypt.hashSync(password, SALT_ROUNDS);
-    insertStmt.run(id, name.trim(), normalized, hash, role);
+    insertStmt.run(id, name.trim(), normalized, hash, role, status);
     return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
   },
 
@@ -47,5 +67,84 @@ export const userModel = {
       return { ok: false, error: 'Invalid email or password. Please try again.' };
     }
     return { ok: true, user: toPublicUser(row) };
+  },
+
+  /**
+   * @returns {{ ok: true, user: object } | { ok: false, error: string }}
+   */
+  update(id, { name, email, role, status }) {
+    const row = findByIdStmt.get(id);
+    if (!row) {
+      return { ok: false, error: 'User not found.' };
+    }
+    
+    if (role && !Object.values(ROLES).includes(role)) {
+      return { ok: false, error: 'Invalid role selected.' };
+    }
+    
+    if (status && !['active', 'inactive', 'deactivated'].includes(status)) {
+      return { ok: false, error: 'Invalid status selected.' };
+    }
+
+    const normalizedEmail = email ? email.trim().toLowerCase() : row.email;
+    if (email && normalizedEmail !== row.email && this.emailExists(normalizedEmail)) {
+      return { ok: false, error: 'An account with this email already exists.' };
+    }
+
+    updateStmt.run(
+      name || row.name,
+      normalizedEmail,
+      role || row.role,
+      status !== undefined ? status : row.status,
+      id
+    );
+    
+    return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
+  },
+
+  /**
+   * @returns {{ ok: true, user: object } | { ok: false, error: string }}
+   */
+  updateStatus(id, status) {
+    const row = findByIdStmt.get(id);
+    if (!row) {
+      return { ok: false, error: 'User not found.' };
+    }
+    
+    if (!['active', 'inactive', 'deactivated'].includes(status)) {
+      return { ok: false, error: 'Invalid status selected.' };
+    }
+
+    updateStatusStmt.run(status, id);
+    return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
+  },
+
+  /**
+   * @returns {{ users: array, total: number }}
+   */
+  list({ search = '', role = '', status = '', page = 1, limit = 20 }) {
+    const offset = (page - 1) * limit;
+    const searchPattern = search ? `%${search}%` : '';
+    
+    const users = listStmt.all(
+      searchPattern, searchPattern, search,
+      role, role,
+      status, status,
+      limit, offset
+    );
+    
+    const { count } = countStmt.get(
+      searchPattern, searchPattern, search,
+      role, role,
+      status, status
+    );
+    
+    return {
+      users: users.map(toPublicUser),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit)
+    };
   },
 };
