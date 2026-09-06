@@ -80,7 +80,7 @@ export default function TenantProfile() {
   const user = state.data;
 
   return (
-    <div>
+    <div className="profile-page">
       <div className="tenant-page-head">
         <h1>Profile</h1>
         <p>View and edit your personal information.</p>
@@ -92,55 +92,61 @@ export default function TenantProfile() {
         </div>
       )}
 
-      <form className="tenant-card form-card" onSubmit={handleSubmit} noValidate>
+      <form className="tenant-card profile-card" onSubmit={handleSubmit} noValidate>
+        <header className="card-head">
+          <h2>Personal information</h2>
+        </header>
+
         {serverError && (
           <div className="alert alert-error" role="alert">
             {serverError}
           </div>
         )}
 
-        <TextField
-          label="Full Name"
-          name="name"
-          placeholder="Your name"
-          value={form.name}
-          onChange={setField('name')}
-          error={errors.name}
-          autoComplete="name"
-        />
-        <TextField
-          label="Email Address"
-          name="email"
-          type="email"
-          placeholder="you@example.com"
-          value={form.email}
-          onChange={setField('email')}
-          error={errors.email}
-          autoComplete="email"
-        />
-        <TextField
-          label="Phone Number"
-          name="phone"
-          type="tel"
-          placeholder="+92 300 0000000"
-          value={form.phone}
-          onChange={setField('phone')}
-          error={errors.phone}
-          autoComplete="tel"
-        />
+        <div className="profile-fields">
+          <TextField
+            label="Full Name"
+            name="name"
+            placeholder="Your name"
+            value={form.name}
+            onChange={setField('name')}
+            error={errors.name}
+            autoComplete="name"
+          />
+          <TextField
+            label="Email Address"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            value={form.email}
+            onChange={setField('email')}
+            error={errors.email}
+            autoComplete="email"
+          />
+          <TextField
+            label="Phone Number"
+            name="phone"
+            type="tel"
+            placeholder="+92 300 0000000"
+            value={form.phone}
+            onChange={setField('phone')}
+            error={errors.phone}
+            autoComplete="tel"
+          />
+        </div>
 
-        <div className="form-actions">
+        <div className="form-actions profile-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </form>
 
-      <section className="tenant-card">
+      <section className="tenant-card profile-card">
         <header className="card-head">
           <h2>Account</h2>
         </header>
-        <div className="detail-grid">
+        <div className="profile-meta-grid">
           <div className="detail-item">
             <p className="detail-label">User ID</p>
             <p className="detail-value mono">{user.id}</p>

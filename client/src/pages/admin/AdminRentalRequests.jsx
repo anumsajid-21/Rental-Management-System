@@ -23,8 +23,8 @@ export default function AdminRentalRequests() {
         page,
         limit: 20
       });
-      setRequests(result.requests);
-      setTotalPages(result.totalPages);
+      setRequests(result.requests || result.rentalRequests || []);
+      setTotalPages(result.totalPages || 1);
       if (result.statusCounts) {
         setStatusCounts(result.statusCounts);
       }
@@ -152,13 +152,13 @@ export default function AdminRentalRequests() {
                       <small className="text-muted">{request.propertyCity}</small>
                     </td>
                     <td>Unit #{request.unitNumber}</td>
-                    <td>{formatCurrency(request.rentAmount)}</td>
+                    <td>{formatCurrency(request.rentAmount ?? request.monthlyRent ?? 0)}</td>
                     <td>
                       <span className={`status-badge ${request.status}`}>
                         {request.status}
                       </span>
                     </td>
-                    <td>{new Date(request.createdAt).toLocaleDateString()}</td>
+                    <td>{request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '—'}</td>
                   </tr>
                 ))}
               </tbody>
