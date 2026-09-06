@@ -1,12 +1,13 @@
 import { db } from '../db/database.js';
 
 const SELECT_BASE = `
-  SELECT r.*, p.name AS property_name, p.location AS property_location,
+  SELECT r.*, p.name AS property_name,
+         COALESCE(NULLIF(p.location, ''), p.address) AS property_location,
          un.unit_number, ow.name AS owner_name
   FROM rentals r
   JOIN properties p ON p.id = r.property_id
-  JOIN units un ON un.id = r.unit_id
-  JOIN users ow ON ow.id = r.owner_id
+  LEFT JOIN units un ON un.id = r.unit_id
+  LEFT JOIN users ow ON ow.id = COALESCE(r.owner_id, p.owner_id)
 `;
 
 function mapRental(row) {

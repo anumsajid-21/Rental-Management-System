@@ -1,57 +1,8 @@
-<<<<<<< HEAD
 import crypto from 'node:crypto';
 import { db } from '../db/database.js';
 
 const PROPERTY_TYPES = ['apartment', 'house', 'studio', 'shop', 'office'];
-const PROPERTY_STATUSES = ['available', 'occupied', 'maintenance', 'inactive'];
-
-const findByOwnerStmt = db.prepare(
-  `SELECT p.*, (u.name || '') AS owner_name FROM properties p
-   JOIN users u ON u.id = p.owner_id
-   WHERE p.owner_id = ? ORDER BY p.created_at DESC`
-);
-const findByIdAndOwnerStmt = db.prepare(
-  'SELECT * FROM properties WHERE id = ? AND owner_id = ?'
-);
-const duplicateStmt = db.prepare(
-  `SELECT id FROM properties
-   WHERE owner_id = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?)) AND LOWER(TRIM(address)) = LOWER(TRIM(?))`
-);
-const insertStmt = db.prepare(
-  `INSERT INTO properties (id, owner_id, name, address, city, property_type, description, bedrooms, bathrooms, monthly_rent, status)
-   VALUES (@id, @owner_id, @name, @address, @city, @property_type, @description, @bedrooms, @bathrooms, @monthly_rent, @status)`
-);
-
-export const propertyModel = {
-  PROPERTY_TYPES,
-  PROPERTY_STATUSES,
-
-  listByOwner: (ownerId) => findByOwnerStmt.all(ownerId),
-
-  /** Authorisation-safe: returns the property only if it belongs to ownerId. */
-  findByIdAndOwner: (id, ownerId) => findByIdAndOwnerStmt.get(id, ownerId),
-
-  isDuplicateForOwner: (ownerId, name, address) =>
-    Boolean(duplicateStmt.get(ownerId, name, address)),
-
-  createForOwner(data) {
-    const id = crypto.randomUUID();
-    insertStmt.run({
-      id,
-      owner_id: data.ownerId,
-      name: String(data.name).trim(),
-      address: String(data.address).trim(),
-      city: data.city ? String(data.city).trim() : null,
-      property_type: data.propertyType || 'apartment',
-      description: data.description ? String(data.description).trim() : null,
-      bedrooms: Number(data.bedrooms) || 0,
-      bathrooms: Number(data.bathrooms) || 0,
-      monthly_rent: Number(data.monthlyRent) || 0,
-      status: data.status || 'available',
-    });
-    return findByIdAndOwnerStmt.get(id, data.ownerId);
-=======
-import { db } from '../db/database.js';
+const PROPERTY_STATUSES = ['available', 'occupied', 'maintenance', 'inactive', 'unavailable'];
 
 /* Reusable scalar sub-selects so list queries expose unit availability. */
 const AVAILABLE_UNITS_SQL = `(SELECT COUNT(*) FROM units u WHERE u.property_id = p.id AND u.status = 'available')`;
@@ -72,12 +23,15 @@ function mapProperty(row) {
     ownerId: row.owner_id,
     ownerName: row.owner_name || null,
     name: row.name,
-    location: row.location,
+    location: row.location || row.address || '',
+    address: row.address || row.location || '',
+    city: row.city || null,
     propertyType: row.property_type,
     description: row.description,
     bedrooms: row.bedrooms,
     bathrooms: row.bathrooms,
-    rent: row.rent,
+    rent: row.rent ?? row.monthly_rent ?? 0,
+    monthly_rent: row.monthly_rent ?? row.rent ?? 0,
     amenities: JSON.parse(row.amenities || '[]'),
     imageUrl: row.image_url || null,
     status: row.status,
@@ -85,6 +39,7 @@ function mapProperty(row) {
     totalUnits: row.total_units ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    owner_name: row.owner_name || '',
   };
 }
 
@@ -103,7 +58,58 @@ function mapUnit(row) {
   };
 }
 
+const findByOwnerStmt = db.prepare(
+  `SELECT p.*, (u.name || '') AS owner_name FROM properties p
+   JOIN users u ON u.id = p.owner_id
+   WHERE p.owner_id = ? ORDER BY p.created_at DESC`
+);
+const findByIdAndOwnerStmt = db.prepare(
+  'SELECT * FROM properties WHERE id = ? AND owner_id = ?'
+);
+const duplicateStmt = db.prepare(
+  `SELECT id FROM properties
+   WHERE owner_id = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+     AND LOWER(TRIM(COALESCE(NULLIF(address,''), location))) = LOWER(TRIM(?))`
+);
+const insertOwnerStmt = db.prepare(
+  `INSERT INTO properties (id, owner_id, name, address, location, city, property_type, description, bedrooms, bathrooms, monthly_rent, rent, status)
+   VALUES (@id, @owner_id, @name, @address, @location, @city, @property_type, @description, @bedrooms, @bathrooms, @monthly_rent, @rent, @status)`
+);
+
 export const propertyModel = {
+  PROPERTY_TYPES,
+  PROPERTY_STATUSES,
+
+  listByOwner: (ownerId) => findByOwnerStmt.all(ownerId),
+
+  /** Authorisation-safe: returns the property only if it belongs to ownerId. */
+  findByIdAndOwner: (id, ownerId) => findByIdAndOwnerStmt.get(id, ownerId),
+
+  isDuplicateForOwner: (ownerId, name, address) =>
+    Boolean(duplicateStmt.get(ownerId, name, address)),
+
+  createForOwner(data) {
+    const id = crypto.randomUUID();
+    const address = String(data.address).trim();
+    const monthlyRent = Number(data.monthlyRent) || 0;
+    insertOwnerStmt.run({
+      id,
+      owner_id: data.ownerId,
+      name: String(data.name).trim(),
+      address,
+      location: address,
+      city: data.city ? String(data.city).trim() : null,
+      property_type: data.propertyType || 'apartment',
+      description: data.description ? String(data.description).trim() : '',
+      bedrooms: Number(data.bedrooms) || 0,
+      bathrooms: Number(data.bathrooms) || 0,
+      monthly_rent: monthlyRent,
+      rent: monthlyRent,
+      status: data.status || 'available',
+    });
+    return findByIdAndOwnerStmt.get(id, data.ownerId);
+  },
+
   /**
    * List properties with optional filters (search, location, type, rent range,
    * availability). All filters are optional — absent filters are skipped.
@@ -113,24 +119,24 @@ export const propertyModel = {
     const params = [];
 
     if (filters.q) {
-      clauses.push('(p.name LIKE ? OR p.location LIKE ? OR p.description LIKE ?)');
+      clauses.push('(p.name LIKE ? OR p.location LIKE ? OR p.address LIKE ? OR p.description LIKE ?)');
       const like = `%${filters.q}%`;
-      params.push(like, like, like);
+      params.push(like, like, like, like);
     }
     if (filters.location) {
-      clauses.push('p.location LIKE ?');
-      params.push(`%${filters.location}%`);
+      clauses.push('(p.location LIKE ? OR p.address LIKE ?)');
+      params.push(`%${filters.location}%`, `%${filters.location}%`);
     }
     if (filters.type) {
       clauses.push('p.property_type = ?');
       params.push(filters.type);
     }
     if (filters.minRent !== undefined && filters.minRent !== '' && filters.minRent !== null) {
-      clauses.push('p.rent >= ?');
+      clauses.push('COALESCE(NULLIF(p.rent, 0), p.monthly_rent) >= ?');
       params.push(Number(filters.minRent));
     }
     if (filters.maxRent !== undefined && filters.maxRent !== '' && filters.maxRent !== null) {
-      clauses.push('p.rent <= ?');
+      clauses.push('COALESCE(NULLIF(p.rent, 0), p.monthly_rent) <= ?');
       params.push(Number(filters.maxRent));
     }
     if (filters.availableOnly) {
@@ -164,6 +170,5 @@ export const propertyModel = {
 
   findUnitById(id) {
     return mapUnit(db.prepare('SELECT * FROM units WHERE id = ?').get(id));
->>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
   },
 };
