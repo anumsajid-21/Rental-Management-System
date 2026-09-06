@@ -1,4 +1,6 @@
 @import './base.css';
 @import './auth.css';
 @import './areas.css';
+@import './owner.css';
+@import './tenant.css';
 @import './admin.css';

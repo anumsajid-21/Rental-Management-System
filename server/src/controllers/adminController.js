@@ -182,7 +182,7 @@ export function getProperties(req, res) {
     const validatedPage = Math.max(1, parseInt(page) || 1);
     const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20));
 
-    const result = propertyModel.list({
+    const result = propertyModel.listForAdmin({
       search: String(search).trim(),
       city,
       status,
@@ -254,7 +254,7 @@ export function getRentals(req, res) {
     const validatedPage = Math.max(1, parseInt(page) || 1);
     const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20));
 
-    if (status && !['active', 'ended', 'cancelled'].includes(status)) {
+    if (status && !['active', 'ended', 'cancelled', 'pending'].includes(status)) {
       return res.status(400).json({ error: 'Invalid rental status filter.' });
     }
 
@@ -292,11 +292,11 @@ export function getTransactions(req, res) {
     const validatedPage = Math.max(1, parseInt(page) || 1);
     const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20));
 
-    if (status && !['pending', 'paid', 'overdue', 'failed'].includes(status)) {
+    if (status && !['pending', 'paid', 'overdue', 'failed', 'completed', 'refunded'].includes(status)) {
       return res.status(400).json({ error: 'Invalid transaction status filter.' });
     }
 
-    const result = transactionModel.list({
+    const result = transactionModel.listForAdmin({
       status,
       tenantId: String(tenantId).trim(),
       ownerId: String(ownerId).trim(),
@@ -338,7 +338,7 @@ export function getMaintenance(req, res) {
     const validatedPage = Math.max(1, parseInt(page) || 1);
     const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20));
 
-    if (status && !['submitted', 'in_progress', 'resolved', 'cancelled'].includes(status)) {
+    if (status && !['submitted', 'in_progress', 'resolved', 'rejected', 'cancelled'].includes(status)) {
       return res.status(400).json({ error: 'Invalid maintenance status filter.' });
     }
 
@@ -346,7 +346,7 @@ export function getMaintenance(req, res) {
       return res.status(400).json({ error: 'Invalid maintenance priority filter.' });
     }
 
-    const result = maintenanceModel.list({
+    const result = maintenanceModel.listForAdmin({
       status,
       priority,
       propertyId: String(propertyId).trim(),
@@ -496,7 +496,7 @@ export function exportReports(req, res) {
     }
 
     if (type === 'transactions') {
-      const transactions = transactionModel.list({ page: 1, limit: 10000 });
+      const transactions = transactionModel.listForAdmin({ page: 1, limit: 10000 });
       if (format === 'csv') {
         const csvRows = [
           'ID,Tenant,Owner,Property,Unit,Amount,Payment Month,Payment Date,Status',

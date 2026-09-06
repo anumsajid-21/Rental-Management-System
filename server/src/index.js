@@ -5,6 +5,8 @@ import { runMigrations } from './db/database.js';
 import { userModel } from './models/userModel.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import ownerRoutes from './routes/ownerRoutes.js';
+import tenantRoutes from './routes/tenantRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +28,8 @@ app.set('userModel', userModel);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/owner', ownerRoutes);
+app.use('/api/tenant', tenantRoutes);
 
 // 404 + error handler
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));

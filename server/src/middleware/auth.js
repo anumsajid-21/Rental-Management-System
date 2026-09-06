@@ -18,6 +18,9 @@ export function requireAuth(req, res, next) {
     const payload = jwt.verify(token, JWT_SECRET);
     const user = req.app.get('userModel').findById(payload.sub);
     if (!user) return res.status(401).json({ error: 'Account no longer exists.' });
+    if ((user.status || 'active') !== 'active') {
+      return res.status(403).json({ error: 'This account is inactive.' });
+    }
     req.user = user;
     next();
   } catch (err) {

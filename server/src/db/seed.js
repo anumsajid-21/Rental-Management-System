@@ -28,9 +28,38 @@ function svgImage(c1, c2) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+const hash = bcrypt.hashSync(PASSWORD, 10);
+
+/* ---------- Users (idempotent per email) ---------- */
+const insertUser = db.prepare(
+  'INSERT INTO users (id, name, email, password, role, phone, status) VALUES (?, ?, ?, ?, ?, ?, ?)'
+);
+
+function ensureUser(email, name, role, phone) {
+  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (existing) return existing.id;
+  const id = uuid();
+  insertUser.run(id, name, email, hash, role, phone, 'active');
+  return id;
+}
+
+ensureUser('admin@example.com', 'System Admin', 'admin', '+92 300 0000001');
+const ownerId = ensureUser('owner@example.com', 'Ahmed Raza', 'property_owner', '+92 321 4567890');
+const tenantAId = ensureUser('tenant@example.com', 'Ayesha Khan', 'tenant', '+92 300 1234567');
+const tenantBId = ensureUser('tenant2@example.com', 'Bilal Ahmed', 'tenant', '+92 345 9876543');
+
+function printDemoAccounts() {
+  console.log('[seed] Demo accounts (password: password123):');
+  console.log('  admin          → admin@example.com');
+  console.log('  tenant         → tenant@example.com');
+  console.log('  tenant (2nd)   → tenant2@example.com');
+  console.log('  property owner → owner@example.com');
+}
+
 const propertyCount = db.prepare('SELECT COUNT(*) AS c FROM properties').get().c;
 if (propertyCount > 0) {
-  console.log('[seed] properties already exist — seed skipped.');
+  console.log('[seed] properties already exist — property/data seed skipped (demo users ensured).');
+  printDemoAccounts();
   process.exit(0);
 }
 
@@ -39,24 +68,6 @@ console.log('[seed] seeding demo data…');
 const now = new Date();
 const prevMonth = shiftMonth(now, -1);
 const nextMonth = shiftMonth(now, 1);
-const hash = bcrypt.hashSync(PASSWORD, 10);
-
-/* ---------- Users (idempotent per email) ---------- */
-const insertUser = db.prepare(
-  'INSERT INTO users (id, name, email, password, role, phone) VALUES (?, ?, ?, ?, ?, ?)'
-);
-
-function ensureUser(email, name, role, phone) {
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-  if (existing) return existing.id;
-  const id = uuid();
-  insertUser.run(id, name, email, hash, role, phone);
-  return id;
-}
-
-const ownerId = ensureUser('owner@example.com', 'Ahmed Raza', 'property_owner', '+92 321 4567890');
-const tenantAId = ensureUser('tenant@example.com', 'Ayesha Khan', 'tenant', '+92 300 1234567');
-const tenantBId = ensureUser('tenant2@example.com', 'Bilal Ahmed', 'tenant', '+92 345 9876543');
 
 /* ---------- Properties + units ---------- */
 const insertProperty = db.prepare(`
@@ -202,8 +213,6 @@ insertRentalRequest.run(
   'pending', stamp(addDays(now, -2)), stamp(addDays(now, -2))
 );
 
-console.log('[seed] done. Demo accounts (password: password123):');
-console.log('  tenant         → tenant@example.com  (active rental, payments, maintenance)');
-console.log('  tenant (2nd)   → tenant2@example.com (pending rental request only)');
-console.log('  property owner → owner@example.com');
+console.log('[seed] done.');
+printDemoAccounts();
 

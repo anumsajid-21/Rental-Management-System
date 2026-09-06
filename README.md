@@ -22,9 +22,10 @@ Demo accounts after `npm run seed` (password for all: `password123`):
 
 | Email                | Role           | Data                                                  |
 |----------------------|----------------|-------------------------------------------------------|
+| `admin@example.com`  | admin          | Full Admin Portal                                     |
 | `tenant@example.com` | tenant         | Active rental, payments, maintenance requests         |
 | `tenant2@example.com`| tenant         | Pending rental request only (data-isolation testing)  |
-| `owner@example.com`  | property_owner | Owns the seeded properties (Owner Portal is a later phase) |
+| `owner@example.com`  | property_owner | Owns the seeded properties                            |
 
 Then open **http://localhost:5173**.
 
