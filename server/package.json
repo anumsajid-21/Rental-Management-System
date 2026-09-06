@@ -8,11 +8,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "init-db": "node src/db/initDb.js",
-<<<<<<< HEAD
+    "seed": "node src/db/seed.js",
     "seed:dev": "node src/db/seedDev.js"
-=======
-    "seed": "node src/db/seed.js"
->>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -12,7 +12,7 @@ const emailExistsExceptStmt = db.prepare('SELECT 1 FROM users WHERE email = ? AN
 const insertStmt = db.prepare(
   'INSERT INTO users (id, name, email, password, role, phone) VALUES (?, ?, ?, ?, ?, ?)'
 );
-const updateProfileStmt = db.prepare(
+const updateProfileWithPhoneStmt = db.prepare(
   'UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?'
 );
 const updateProfileStmt = db.prepare(
@@ -68,11 +68,14 @@ export const userModel = {
     return { ok: true, user: toPublicUser(row) };
   },
 
-<<<<<<< HEAD
-  /** Update basic profile info. Checks email uniqueness before saving. */
-  updateProfile(id, { name, email }) {
+  /**
+   * Update profile. Supports tenant (name/email/phone → returns user) and
+   * owner (name/email with validation → returns { ok, user|error }).
+   */
+  updateProfile(id, { name, email, phone }) {
     const row = this.findById(id);
     if (!row) return { ok: false, error: 'Account not found.' };
+
     const trimmedName = String(name || '').trim();
     const normalized = String(email || '').trim().toLowerCase();
     if (!trimmedName) return { ok: false, error: 'Name is required.', field: 'name' };
@@ -83,6 +86,13 @@ export const userModel = {
     if (existing && existing.id !== id) {
       return { ok: false, error: 'Another account already uses this email.', field: 'email' };
     }
+
+    if (phone !== undefined) {
+      updateProfileWithPhoneStmt.run(trimmedName, normalized, phone || null, id);
+      // Tenant controller expects the public user object directly.
+      return toPublicUser(this.findById(id));
+    }
+
     updateProfileStmt.run(trimmedName, normalized, id);
     return { ok: true, user: toPublicUser(this.findById(id)) };
   },
@@ -105,12 +115,5 @@ export const userModel = {
     }
     updatePasswordStmt.run(bcrypt.hashSync(newPassword, SALT_ROUNDS), id);
     return { ok: true };
-=======
-  /** Updates editable profile fields only — role and id are never touched. */
-  updateProfile(id, { name, email, phone }) {
-    updateProfileStmt.run(name.trim(), email.trim().toLowerCase(), phone || null, id);
-    return toPublicUser(findByIdStmt.get(id));
->>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
   },
 };
-

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+import crypto from 'node:crypto';
 import { db } from '../db/database.js';
 
 const listStmt = db.prepare(
@@ -23,7 +23,7 @@ const listFilteredStmt = db.prepare(
 
 const findOwnedStmt = db.prepare(
   `SELECT m.*, u.name AS tenant_name, u.email AS tenant_email,
-          p.name AS property_name, p.address AS property_address
+          p.name AS property_name, COALESCE(p.address, p.location) AS property_address
    FROM maintenance_requests m
    JOIN users u ON u.id = m.tenant_id
    JOIN properties p ON p.id = m.property_id
@@ -41,41 +41,14 @@ const TRANSITIONS = {
   submitted: ['in_progress'],
   in_progress: ['resolved'],
   resolved: [],
+  rejected: [],
 };
-
-export const maintenanceModel = {
-  TRANSITIONS,
-
-  list: (ownerId, { status, search } = {}) => {
-    const st = status && status !== 'all' ? status : null;
-    const s = search && String(search).trim() ? String(search).trim() : null;
-    return listFilteredStmt.all({ ownerId, status: st, search: s });
-  },
-
-  listAll: (ownerId) => listStmt.all(ownerId),
-
-  /** Authorisation-safe: request only if its property belongs to this owner. */
-  findByIdAndOwner: (id, ownerId) => findOwnedStmt.get(id, ownerId) || null,
-
-  updateStatus(id, ownerId, nextStatus) {
-    const current = findOwnedStmt.get(id, ownerId);
-    if (!current) return { ok: false, error: 'Maintenance request not found.' };
-    const allowed = TRANSITIONS[current.status] || [];
-    if (!allowed.includes(nextStatus)) {
-      return { ok: false, error: `Cannot change status from '${current.status}' to '${nextStatus}'.` };
-    }
-    const result = updateStatusStmt.run(nextStatus, id, current.status, ownerId);
-    if (result.changes === 0) return { ok: false, error: 'Could not update the request. Please try again.' };
-    return { ok: true, request: findOwnedStmt.get(id, ownerId) };
-=======
-import crypto from 'node:crypto';
-import { db } from '../db/database.js';
 
 const SELECT_BASE = `
   SELECT m.*, p.name AS property_name, un.unit_number
   FROM maintenance_requests m
   JOIN properties p ON p.id = m.property_id
-  JOIN units un ON un.id = m.unit_id
+  LEFT JOIN units un ON un.id = m.unit_id
 `;
 
 function mapRequest(row) {
@@ -104,6 +77,31 @@ const insertStmt = db.prepare(`
 `);
 
 export const maintenanceModel = {
+  TRANSITIONS,
+
+  list: (ownerId, { status, search } = {}) => {
+    const st = status && status !== 'all' ? status : null;
+    const s = search && String(search).trim() ? String(search).trim() : null;
+    return listFilteredStmt.all({ ownerId, status: st, search: s });
+  },
+
+  listAll: (ownerId) => listStmt.all(ownerId),
+
+  /** Authorisation-safe: request only if its property belongs to this owner. */
+  findByIdAndOwner: (id, ownerId) => findOwnedStmt.get(id, ownerId) || null,
+
+  updateStatus(id, ownerId, nextStatus) {
+    const current = findOwnedStmt.get(id, ownerId);
+    if (!current) return { ok: false, error: 'Maintenance request not found.' };
+    const allowed = TRANSITIONS[current.status] || [];
+    if (!allowed.includes(nextStatus)) {
+      return { ok: false, error: `Cannot change status from '${current.status}' to '${nextStatus}'.` };
+    }
+    const result = updateStatusStmt.run(nextStatus, id, current.status, ownerId);
+    if (result.changes === 0) return { ok: false, error: 'Could not update the request. Please try again.' };
+    return { ok: true, request: findOwnedStmt.get(id, ownerId) };
+  },
+
   /** Status starts at 'submitted'; only the owner workflow may change it later. */
   create({ tenantId, propertyId, unitId, category, title, description, priority }) {
     const id = crypto.randomUUID();
@@ -139,6 +137,5 @@ export const maintenanceModel = {
       )
       .get(tenantId);
     return row.c;
->>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
   },
 };
