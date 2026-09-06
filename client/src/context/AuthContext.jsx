@@ -66,6 +66,17 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => persist(null), [persist]);
 
+  /** Merge fresh user data (e.g. after a profile update) into the session. */
+  const updateUser = useCallback((nextUser) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const merged = { ...prev, user: nextUser };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(merged));
+      return merged;
+    });
+    setUser(nextUser);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -75,9 +86,10 @@ export function AuthProvider({ children }) {
       signUp,
       signIn,
       logout,
+      updateUser,
       homeForRole: (role) => ROLE_HOME[role] || '/',
     }),
-    [user, session, loading, signUp, signIn, logout]
+    [user, session, loading, signUp, signIn, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
