@@ -1,4 +1,5 @@
 ﻿import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../context/AuthContext';
 
 /* Inline SVG icons (stroke follows currentColor so CSS states apply). */
@@ -107,8 +108,7 @@ export default function OwnerArea() {
     <div className="area-page area-with-sidebar">
       <aside className="sidebar">
         <div className="sidebar-brand-wrap">
-          <div className="sidebar-brand" dir="rtl" lang="ur">╪▒█ü╪º╪ª╪┤</div>
-          <div className="sidebar-brand-sub">Owner Portal</div>
+          <BrandLogo size="sm" portal="owner" subtitle="Owner Portal" className="sidebar-brand-logo" />
         </div>
 
         <nav className="sidebar-nav">

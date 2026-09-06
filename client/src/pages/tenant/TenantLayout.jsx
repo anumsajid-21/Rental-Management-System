@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import BrandLogo from '../../components/BrandLogo';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV_ITEMS = [
@@ -28,15 +29,7 @@ export default function TenantLayout() {
     <div className="tenant-page">
       <aside className="tenant-sidebar">
         <div className="tenant-brand">
-          <div className="tenant-brand-row">
-            <span className="brand-logo-sm" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z" />
-              </svg>
-            </span>
-            <span className="brand-name-sm" dir="rtl" lang="ur">رہائش</span>
-          </div>
-          <span className="tenant-portal-label">Tenant Portal</span>
+          <BrandLogo size="sm" portal="tenant" subtitle="Tenant Portal" />
         </div>
 
         <nav className="tenant-nav" aria-label="Tenant navigation">

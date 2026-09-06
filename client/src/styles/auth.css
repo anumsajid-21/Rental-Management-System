@@ -54,22 +54,14 @@
   justify-content: center;
   border-right: 1px solid var(--border);
 }
-.brand-logo {
-  width: 48px; height: 48px;
-  border-radius: 14px;
-  background: var(--accent);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 22px;
-  box-shadow: 0 6px 14px rgba(95, 141, 118, 0.35);
+.auth-brand .brand-lockup {
+  margin-bottom: 18px;
+}
+.auth-brand h1.brand-lockup-name,
+.auth-brand .brand-lockup-name {
+  color: var(--accent-dark);
 }
 .auth-brand h1 { font-size: 1.55rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; }
-.brand-name {
-  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', var(--font);
-  font-size: 2.1rem;
-  line-height: 1.9;
-  letter-spacing: 0;
-}
 .auth-brand p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
 .brand-points { list-style: none; display: grid; gap: 10px; }
 .brand-points li {
@@ -112,7 +104,7 @@
 }
 .role-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   text-align: left;
   padding: 14px;
@@ -168,9 +160,10 @@
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .auth-container { grid-template-columns: 1fr; max-width: 480px; }
-  .auth-brand { border-right: none; border-bottom: 1px solid var(--border); padding: 32px 32px 28px; }
+  .auth-brand { border-right: none; border-bottom: 1px solid var(--border); padding: 28px 32px 22px; }
   .auth-brand .brand-points { display: none; }
-  .auth-brand p { margin-bottom: 0; }
+  .auth-brand p { display: none; }
+  .auth-brand .brand-lockup { margin-bottom: 0; }
   .auth-card { padding: 32px 28px; }
 }
 @media (max-width: 460px) {
