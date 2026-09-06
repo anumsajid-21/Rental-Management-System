@@ -66,6 +66,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => persist(null), [persist]);
 
+<<<<<<< HEAD
   /** Refresh the cached user object (e.g. after a profile update). */
   const updateUser = useCallback((nextUser) => {
     setSession((prev) => {
@@ -73,6 +74,15 @@ export function AuthProvider({ children }) {
       const next = { ...prev, user: nextUser };
       localStorage.setItem(SESSION_KEY, JSON.stringify(next));
       return next;
+=======
+  /** Merge fresh user data (e.g. after a profile update) into the session. */
+  const updateUser = useCallback((nextUser) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const merged = { ...prev, user: nextUser };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(merged));
+      return merged;
+>>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
     });
     setUser(nextUser);
   }, []);

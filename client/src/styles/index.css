@@ -1,4 +1,8 @@
 @import './base.css';
 @import './auth.css';
 @import './areas.css';
+<<<<<<< HEAD
 @import './owner.css';
+=======
+@import './tenant.css';
+>>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424

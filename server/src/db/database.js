@@ -34,6 +34,7 @@ const MIGRATIONS = [
     `,
   },
   {
+<<<<<<< HEAD
     // Shared core tables (additive; used by owner rent/transactions/maintenance/
     // reports/csv-import modules). Property CRUD (Person 2) and the tenant
     // portal (Person 1) read/write these same tables.
@@ -119,6 +120,100 @@ const MIGRATIONS = [
         updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
       );
       CREATE INDEX IF NOT EXISTS idx_maintenance_property ON maintenance_requests (property_id);
+=======
+    id: '002_tenant_portal_entities',
+    up: `
+      ALTER TABLE users ADD COLUMN phone TEXT;
+
+      CREATE TABLE IF NOT EXISTS properties (
+        id            TEXT PRIMARY KEY,
+        owner_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name          TEXT NOT NULL,
+        location      TEXT NOT NULL,
+        property_type TEXT NOT NULL,
+        description   TEXT NOT NULL DEFAULT '',
+        bedrooms      INTEGER NOT NULL DEFAULT 0,
+        bathrooms     INTEGER NOT NULL DEFAULT 0,
+        rent          REAL NOT NULL DEFAULT 0,
+        amenities     TEXT NOT NULL DEFAULT '[]',
+        image_url     TEXT,
+        status        TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'unavailable')),
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS units (
+        id          TEXT PRIMARY KEY,
+        property_id TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+        unit_number TEXT NOT NULL,
+        bedrooms    INTEGER NOT NULL DEFAULT 0,
+        bathrooms   INTEGER NOT NULL DEFAULT 0,
+        rent        REAL NOT NULL,
+        status      TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'reserved')),
+        created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        UNIQUE (property_id, unit_number)
+      );
+
+      CREATE TABLE IF NOT EXISTS rental_requests (
+        id            TEXT PRIMARY KEY,
+        tenant_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        property_id   TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+        unit_id       TEXT NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+        monthly_rent  REAL NOT NULL,
+        move_in_date  TEXT NOT NULL,
+        status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS rentals (
+        id           TEXT PRIMARY KEY,
+        tenant_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        property_id  TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+        unit_id      TEXT NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+        owner_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        monthly_rent REAL NOT NULL,
+        start_date   TEXT NOT NULL,
+        end_date     TEXT,
+        status       TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'ended')),
+        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS transactions (
+        id           TEXT PRIMARY KEY,
+        rental_id    TEXT NOT NULL REFERENCES rentals(id) ON DELETE CASCADE,
+        tenant_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        rent_month   TEXT NOT NULL,
+        amount       REAL NOT NULL,
+        payment_date TEXT,
+        status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('paid', 'pending', 'overdue')),
+        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS maintenance_requests (
+        id             TEXT PRIMARY KEY,
+        tenant_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        property_id    TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+        unit_id        TEXT NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+        category       TEXT NOT NULL CHECK (category IN ('Plumbing', 'Electrical', 'Air Conditioning', 'Appliance', 'Structural', 'Cleaning', 'Security', 'Other')),
+        title          TEXT NOT NULL,
+        description    TEXT NOT NULL,
+        priority       TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+        status         TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'in_progress', 'resolved', 'rejected')),
+        owner_response TEXT,
+        created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_units_property ON units (property_id);
+      CREATE INDEX IF NOT EXISTS idx_rental_requests_tenant ON rental_requests (tenant_id, status);
+      CREATE INDEX IF NOT EXISTS idx_rentals_tenant ON rentals (tenant_id, status);
+      CREATE INDEX IF NOT EXISTS idx_transactions_tenant ON transactions (tenant_id, rent_month);
+      CREATE INDEX IF NOT EXISTS idx_maintenance_tenant ON maintenance_requests (tenant_id, status);
+>>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
     `,
   },
 ];

@@ -8,8 +8,12 @@ const SALT_ROUNDS = 10;
 const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const findByIdStmt = db.prepare('SELECT * FROM users WHERE id = ?');
 const emailExistsStmt = db.prepare('SELECT 1 FROM users WHERE email = ?');
+const emailExistsExceptStmt = db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?');
 const insertStmt = db.prepare(
-  'INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)'
+  'INSERT INTO users (id, name, email, password, role, phone) VALUES (?, ?, ?, ?, ?, ?)'
+);
+const updateProfileStmt = db.prepare(
+  'UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?'
 );
 const updateProfileStmt = db.prepare(
   'UPDATE users SET name = ?, email = ? WHERE id = ?'
@@ -19,18 +23,27 @@ const updatePasswordStmt = db.prepare(
 );
 
 export function toPublicUser(row) {
-  return { id: row.id, name: row.name, email: row.email, role: row.role, createdAt: row.created_at };
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    phone: row.phone || '',
+    createdAt: row.created_at,
+  };
 }
 
 export const userModel = {
   findByEmail: (email) => findByEmailStmt.get(email.trim().toLowerCase()),
   findById: (id) => findByIdStmt.get(id),
   emailExists: (email) => Boolean(emailExistsStmt.get(email.trim().toLowerCase())),
+  emailExistsExcept: (email, exceptId) =>
+    Boolean(emailExistsExceptStmt.get(email.trim().toLowerCase(), exceptId)),
 
   /**
    * @returns {{ ok: true, user: object } | { ok: false, error: string }}
    */
-  create({ name, email, password, role }) {
+  create({ name, email, password, role, phone }) {
     const normalized = email.trim().toLowerCase();
     if (!Object.values(ROLES).includes(role)) {
       return { ok: false, error: 'Invalid role selected.' };
@@ -40,7 +53,7 @@ export const userModel = {
     }
     const id = crypto.randomUUID();
     const hash = bcrypt.hashSync(password, SALT_ROUNDS);
-    insertStmt.run(id, name.trim(), normalized, hash, role);
+    insertStmt.run(id, name.trim(), normalized, hash, role, phone || null);
     return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
   },
 
@@ -55,6 +68,7 @@ export const userModel = {
     return { ok: true, user: toPublicUser(row) };
   },
 
+<<<<<<< HEAD
   /** Update basic profile info. Checks email uniqueness before saving. */
   updateProfile(id, { name, email }) {
     const row = this.findById(id);
@@ -91,5 +105,12 @@ export const userModel = {
     }
     updatePasswordStmt.run(bcrypt.hashSync(newPassword, SALT_ROUNDS), id);
     return { ok: true };
+=======
+  /** Updates editable profile fields only — role and id are never touched. */
+  updateProfile(id, { name, email, phone }) {
+    updateProfileStmt.run(name.trim(), email.trim().toLowerCase(), phone || null, id);
+    return toPublicUser(findByIdStmt.get(id));
+>>>>>>> 923d021c23ead306b3ac70d9a2ca64035bd3d424
   },
 };
+
