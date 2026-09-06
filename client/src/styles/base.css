@@ -45,6 +45,7 @@ body {
   padding: 0 16px;
   font-family: inherit;
   font-size: 0.95rem;
+  line-height: 1;
   color: var(--text);
   background: #fff;
   border: 1.5px solid var(--border);
@@ -64,13 +65,23 @@ body {
 
 /* ---------- Buttons ---------- */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
+  line-height: 1;
+  /* Slightly more bottom padding offsets Inter capital metrics so labels look centered */
+  padding: 1px 18px 3px;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
+  vertical-align: middle;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 .btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
@@ -129,3 +140,72 @@ body {
 }
 .field-error select,
 .field-error textarea { border-color: var(--danger); }
+
+/* ---------- Brand lockup (shared logo) ---------- */
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.brand-lockup-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.brand-lockup-mark {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+  filter: drop-shadow(0 4px 12px rgba(95, 141, 118, 0.28));
+}
+.brand-lockup-sm .brand-lockup-mark { filter: drop-shadow(0 3px 8px rgba(95, 141, 118, 0.25)); }
+.logo-mark { display: block; border-radius: 22%; }
+.brand-lockup-text {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.brand-lockup-stacked .brand-lockup-text {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+.brand-lockup-inline .brand-lockup-text {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+}
+.brand-lockup-name {
+  margin: 0;
+  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', var(--font);
+  font-weight: 700;
+  color: var(--accent-dark);
+  line-height: 1.35;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.brand-lockup-sm .brand-lockup-name { font-size: 1.2rem; }
+.brand-lockup-md .brand-lockup-name { font-size: 1.4rem; }
+.brand-lockup-lg .brand-lockup-name { font-size: 2.05rem; line-height: 1.85; }
+.brand-lockup-sub {
+  display: inline-block;
+  margin: 0;
+  font-family: var(--font);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.brand-lockup-sm .brand-lockup-sub { font-size: 0.55rem; }
+.brand-lockup-owner .brand-lockup-sub { color: #4c745f; }
+.brand-lockup-tenant .brand-lockup-sub { color: #3f6a7d; }
+.brand-lockup-admin .brand-lockup-sub { color: #8a6d3d; }
+.brand-lockup-stacked .brand-lockup-mark {
+  filter: drop-shadow(0 8px 18px rgba(95, 141, 118, 0.32));
+}

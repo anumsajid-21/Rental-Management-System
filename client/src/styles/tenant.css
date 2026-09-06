@@ -19,46 +19,35 @@
   padding: 22px 16px 18px;
   background: var(--card);
   border-right: 1px solid var(--border);
+  overflow-x: hidden;
   overflow-y: auto;
 }
-.tenant-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 6px; }
-.tenant-brand-row { display: flex; align-items: center; gap: 10px; }
-.brand-logo-sm {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
+.tenant-brand {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(95, 141, 118, 0.35);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 6px 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.brand-name-sm {
-  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', var(--font);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--accent-dark);
-  line-height: 1.7;
-}
-.tenant-portal-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--accent-dark);
-  background: var(--accent-soft);
-  border: 1px solid rgba(95, 141, 118, 0.25);
-  padding: 3px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
+.tenant-brand .brand-lockup { width: 100%; }
 
-.tenant-nav { display: flex; flex-direction: column; gap: 4px; }
+.tenant-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 .tenant-nav-link {
   display: block;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 10px 14px;
   border-radius: 10px;
   border: none;
@@ -71,9 +60,16 @@
   text-align: left;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tenant-nav-link:hover { color: var(--text); background: var(--bg-accent); }
-.tenant-nav-link.active { background: var(--accent-soft); color: var(--accent-dark); }
+.tenant-nav-link.active {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
 
 .tenant-sidebar-user {
   margin-top: auto;
@@ -83,9 +79,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  flex-wrap: wrap;
+  min-width: 0;
 }
-.tenant-user-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+.tenant-user-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
 
 .tenant-main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding: 28px 24px 72px; }
 
@@ -134,19 +138,24 @@
 .back-link:hover { color: var(--accent-dark); }
 
 /* ---------- Extra buttons ---------- */
-.btn-sm { height: 38px; padding: 0 16px; font-size: 0.87rem; }
+.btn-sm { height: 38px; padding: 0 16px; font-size: 0.87rem; line-height: 1; }
 .btn-ghost-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 36px;
   padding: 0 14px;
   font-size: 0.85rem;
   font-family: inherit;
   font-weight: 600;
+  line-height: 1;
   background: transparent;
   color: var(--danger);
   border: 1.5px solid rgba(176, 86, 63, 0.35);
   border-radius: var(--radius);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+  box-sizing: border-box;
 }
 .btn-ghost-danger:hover:not(:disabled) { background: var(--danger-soft); border-color: var(--danger); }
 .btn-ghost-danger:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -442,6 +451,57 @@ a.list-row:hover { background: var(--bg-accent); }
 .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 .form-actions .btn-ghost { text-decoration: none; display: inline-flex; align-items: center; }
 
+/* ---------- Profile page ---------- */
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 820px;
+}
+
+.profile-page .tenant-page-head {
+  margin-bottom: 0;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: none;
+}
+
+.profile-fields .field {
+  margin-bottom: 14px;
+}
+
+.profile-fields .field:last-child {
+  margin-bottom: 0;
+}
+
+.profile-actions {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.profile-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.profile-meta-grid .detail-value {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .profile-page {
+    max-width: none;
+  }
+
+  .profile-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Chips & notes ---------- */
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .chip {
@@ -492,9 +552,24 @@ a.list-row:hover { background: var(--bg-accent); }
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
-  .tenant-brand { flex-direction: row; align-items: center; gap: 10px; padding: 0; }
+  .tenant-brand {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 8px;
+    margin-bottom: 0;
+    border-bottom: none;
+    width: 100%;
+  }
   .tenant-portal-label { margin-left: auto; }
-  .tenant-nav { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px; }
+  .tenant-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    overflow: visible;
+    flex: 1 1 auto;
+  }
   .tenant-nav-link { width: auto; padding: 8px 13px; border-radius: 999px; font-size: 0.87rem; }
   .tenant-sidebar-user { margin-top: 0; padding-top: 0; border-top: none; }
 }

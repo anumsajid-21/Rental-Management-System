@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
+import BrandLogo from '../components/BrandLogo';
 import '../styles/admin.css';
 
 export default function AdminArea() {
@@ -17,7 +18,7 @@ export default function AdminArea() {
         >
           ☰ Menu
         </button>
-        <span className="brand-name" dir="rtl" lang="ur">رہائش</span>
+        <BrandLogo size="sm" portal="admin" showWordmark className="admin-mobile-brand" />
       </div>
 
       {mobileOpen && (

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 import { useAuth } from '../context/AuthContext';
 
 /** Simple placeholder area header with logout — no dashboard content yet. */
@@ -14,7 +15,7 @@ export default function AreaPlaceholder({ title, user }) {
   return (
     <div className="area-page">
       <header className="area-header">
-        <div className="area-brand" dir="rtl" lang="ur">رہائش</div>
+        <BrandLogo size="sm" className="area-brand" />
         <div className="area-user">
           <span className="area-user-name">{user.name}</span>
           <button className="btn btn-ghost" onClick={handleLogout}>Log Out</button>

@@ -2,10 +2,14 @@ import crypto from 'node:crypto';
 import { db } from '../db/database.js';
 
 const SELECT_BASE = `
-  SELECT rr.*, p.name AS property_name, p.location AS property_location, un.unit_number
+  SELECT rr.*, p.name AS property_name,
+         COALESCE(NULLIF(p.city, ''), p.location, p.address) AS property_city,
+         COALESCE(NULLIF(p.location, ''), p.address) AS property_location,
+         un.unit_number, t.name AS tenant_name, t.email AS tenant_email
   FROM rental_requests rr
   JOIN properties p ON p.id = rr.property_id
   JOIN units un ON un.id = rr.unit_id
+  JOIN users t ON t.id = rr.tenant_id
 `;
 
 function mapRequest(row) {
@@ -16,11 +20,15 @@ function mapRequest(row) {
     propertyId: row.property_id,
     unitId: row.unit_id,
     monthlyRent: row.monthly_rent,
+    rentAmount: row.monthly_rent,
     moveInDate: row.move_in_date,
     status: row.status,
     propertyName: row.property_name,
     propertyLocation: row.property_location,
+    propertyCity: row.property_city,
     unitNumber: row.unit_number,
+    tenantName: row.tenant_name,
+    tenantEmail: row.tenant_email,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -86,7 +94,14 @@ export const rentalRequestModel = {
       .prepare(`${SELECT_BASE} ${where} ORDER BY rr.created_at DESC LIMIT ? OFFSET ?`)
       .all(...params, limit, offset)
       .map(mapRequest);
-    return { rentalRequests, total, page, limit, totalPages: Math.ceil(total / limit) || 1 };
+    return {
+      requests: rentalRequests,
+      rentalRequests,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
   },
 
   getCountsByStatus() {

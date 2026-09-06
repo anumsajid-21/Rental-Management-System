@@ -16,6 +16,7 @@
   top: 0;
   bottom: 0;
   z-index: 100;
+  overflow-x: hidden;
 }
 
 .admin-sidebar-header {
@@ -25,29 +26,14 @@
 
 .admin-brand {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 16px;
 }
 
-.brand-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-name {
-  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', var(--font);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent-dark);
-  margin-top: -6px;
-  line-height: 1;
+.admin-brand .brand-lockup {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .admin-user-info {
@@ -70,6 +56,7 @@
 .admin-nav {
   flex: 1;
   padding: 16px 12px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -81,10 +68,12 @@
   border-radius: 10px;
   color: var(--text-muted);
   text-decoration: none;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   margin-bottom: 4px;
   font-size: 0.9rem;
   font-weight: 500;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-nav-item:hover {
@@ -96,16 +85,22 @@
   background: var(--accent-soft);
   color: var(--accent-dark);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .admin-nav-icon {
   font-size: 1.1rem;
   width: 20px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .admin-nav-label {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-sidebar-footer {
@@ -119,14 +114,17 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  height: 42px;
+  padding: 0 16px;
   background: transparent;
   border: 1.5px solid var(--border);
   border-radius: 10px;
   color: var(--text-muted);
   font-size: 0.9rem;
   font-weight: 500;
+  line-height: 1;
   cursor: pointer;
+  box-sizing: border-box;
   transition: all 0.15s;
 }
 
@@ -474,13 +472,16 @@
   padding: 0 16px;
   font-size: 0.85rem;
   font-weight: 500;
+  line-height: 1;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  box-sizing: border-box;
 }
 
 .admin-action-btn-primary {

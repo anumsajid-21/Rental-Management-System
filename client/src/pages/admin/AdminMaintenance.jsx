@@ -26,8 +26,8 @@ export default function AdminMaintenance() {
         page,
         limit: 20
       });
-      setRequests(result.requests);
-      setTotalPages(result.totalPages);
+      setRequests(result.requests || result.maintenance || []);
+      setTotalPages(result.totalPages || 1);
       if (result.statusCounts) {
         setStatusCounts(result.statusCounts);
       }

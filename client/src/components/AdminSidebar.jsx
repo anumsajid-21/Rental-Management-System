@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 import { useAuth } from '../context/AuthContext';
 
 const menuItems = [
@@ -20,12 +21,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
     <aside className={`admin-sidebar ${isOpen ? 'admin-sidebar-open' : ''}`}>
       <div className="admin-sidebar-header">
         <div className="admin-brand">
-          <div className="brand-logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z" />
-            </svg>
-          </div>
-          <span className="brand-name" dir="rtl" lang="ur">رہائش</span>
+          <BrandLogo size="sm" portal="admin" subtitle="Admin Portal" />
         </div>
         <div className="admin-user-info">
           <span className="admin-user-name">{user?.name}</span>
