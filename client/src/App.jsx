@@ -5,6 +5,15 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import TenantArea from './pages/TenantArea';
 import OwnerArea from './pages/OwnerArea';
+import OwnerHome from './pages/owner/OwnerHome';
+import RentPage from './pages/owner/RentPage';
+import TransactionsPage from './pages/owner/TransactionsPage';
+import MaintenancePage from './pages/owner/MaintenancePage';
+import ReportsPage from './pages/owner/ReportsPage';
+import ImportCsvPage from './pages/owner/ImportCsvPage';
+import OwnerPropertiesPage from './pages/owner/OwnerPropertiesPage';
+import RentalRequestsPage from './pages/owner/RentalRequestsPage';
+import ProfilePage from './pages/owner/ProfilePage';
 import { ROLES } from './lib/roles';
 
 /**
@@ -34,7 +43,17 @@ export default function App() {
                 <OwnerArea />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<OwnerHome />} />
+            <Route path="properties" element={<OwnerPropertiesPage />} />
+            <Route path="rental-requests" element={<RentalRequestsPage />} />
+            <Route path="rent" element={<RentPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="import" element={<ImportCsvPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
 
           {/* Future admin portal — foundation only, not built this phase.
           <Route path="/admin" element={

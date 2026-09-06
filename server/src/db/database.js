@@ -33,6 +33,94 @@ const MIGRATIONS = [
       CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email);
     `,
   },
+  {
+    // Shared core tables (additive; used by owner rent/transactions/maintenance/
+    // reports/csv-import modules). Property CRUD (Person 2) and the tenant
+    // portal (Person 1) read/write these same tables.
+    id: '002_shared_core_tables',
+    up: `
+      CREATE TABLE IF NOT EXISTS properties (
+        id            TEXT PRIMARY KEY,
+        owner_id      TEXT NOT NULL REFERENCES users(id),
+        name          TEXT NOT NULL,
+        address       TEXT NOT NULL,
+        city          TEXT,
+        property_type TEXT NOT NULL DEFAULT 'apartment'
+                      CHECK (property_type IN ('apartment','house','studio','shop','office')),
+        description   TEXT,
+        bedrooms      INTEGER NOT NULL DEFAULT 0,
+        bathrooms     INTEGER NOT NULL DEFAULT 0,
+        monthly_rent  REAL NOT NULL DEFAULT 0,
+        status        TEXT NOT NULL DEFAULT 'available'
+                      CHECK (status IN ('available','occupied','maintenance','inactive')),
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_properties_owner ON properties (owner_id);
+
+      CREATE TABLE IF NOT EXISTS rentals (
+        id           TEXT PRIMARY KEY,
+        property_id  TEXT NOT NULL REFERENCES properties(id),
+        tenant_id    TEXT NOT NULL REFERENCES users(id),
+        monthly_rent REAL NOT NULL,
+        start_date   TEXT NOT NULL,
+        end_date     TEXT,
+        status       TEXT NOT NULL DEFAULT 'active'
+                     CHECK (status IN ('pending','active','ended')),
+        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_rentals_property ON rentals (property_id);
+      CREATE INDEX IF NOT EXISTS idx_rentals_tenant ON rentals (tenant_id);
+
+      CREATE TABLE IF NOT EXISTS rent_payments (
+        id           TEXT PRIMARY KEY,
+        rental_id    TEXT NOT NULL REFERENCES rentals(id),
+        property_id  TEXT NOT NULL REFERENCES properties(id),
+        tenant_id    TEXT NOT NULL REFERENCES users(id),
+        rent_month   TEXT NOT NULL,           -- 'YYYY-MM'
+        amount       REAL NOT NULL,
+        due_date     TEXT NOT NULL,           -- 'YYYY-MM-DD'
+        payment_date TEXT,                    -- set when paid
+        method       TEXT,
+        notes        TEXT,
+        status       TEXT NOT NULL DEFAULT 'pending'
+                     CHECK (status IN ('pending','paid','overdue')),
+        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_rent_payment_month ON rent_payments (rental_id, rent_month);
+      CREATE INDEX IF NOT EXISTS idx_rent_payments_property ON rent_payments (property_id);
+
+      CREATE TABLE IF NOT EXISTS transactions (
+        id              TEXT PRIMARY KEY,
+        owner_id        TEXT NOT NULL REFERENCES users(id),
+        tenant_id       TEXT NOT NULL REFERENCES users(id),
+        property_id     TEXT NOT NULL REFERENCES properties(id),
+        rent_payment_id TEXT REFERENCES rent_payments(id),
+        type            TEXT NOT NULL DEFAULT 'rent_payment'
+                        CHECK (type IN ('rent_payment','refund')),
+        amount          REAL NOT NULL,
+        status          TEXT NOT NULL DEFAULT 'completed'
+                        CHECK (status IN ('completed','pending','failed','refunded')),
+        reference       TEXT,
+        created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_transactions_owner ON transactions (owner_id);
+
+      CREATE TABLE IF NOT EXISTS maintenance_requests (
+        id          TEXT PRIMARY KEY,
+        property_id TEXT NOT NULL REFERENCES properties(id),
+        tenant_id   TEXT NOT NULL REFERENCES users(id),
+        title       TEXT NOT NULL,
+        description TEXT NOT NULL,
+        priority    TEXT NOT NULL DEFAULT 'medium'
+                    CHECK (priority IN ('low','medium','high')),
+        status      TEXT NOT NULL DEFAULT 'submitted'
+                    CHECK (status IN ('submitted','in_progress','resolved')),
+        created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_maintenance_property ON maintenance_requests (property_id);
+    `,
+  },
 ];
 
 export function runMigrations() {

@@ -11,6 +11,12 @@ const emailExistsStmt = db.prepare('SELECT 1 FROM users WHERE email = ?');
 const insertStmt = db.prepare(
   'INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)'
 );
+const updateProfileStmt = db.prepare(
+  'UPDATE users SET name = ?, email = ? WHERE id = ?'
+);
+const updatePasswordStmt = db.prepare(
+  'UPDATE users SET password = ? WHERE id = ?'
+);
 
 export function toPublicUser(row) {
   return { id: row.id, name: row.name, email: row.email, role: row.role, createdAt: row.created_at };
@@ -47,5 +53,43 @@ export const userModel = {
       return { ok: false, error: 'Invalid email or password. Please try again.' };
     }
     return { ok: true, user: toPublicUser(row) };
+  },
+
+  /** Update basic profile info. Checks email uniqueness before saving. */
+  updateProfile(id, { name, email }) {
+    const row = this.findById(id);
+    if (!row) return { ok: false, error: 'Account not found.' };
+    const trimmedName = String(name || '').trim();
+    const normalized = String(email || '').trim().toLowerCase();
+    if (!trimmedName) return { ok: false, error: 'Name is required.', field: 'name' };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+      return { ok: false, error: 'A valid email is required.', field: 'email' };
+    }
+    const existing = this.findByEmail(normalized);
+    if (existing && existing.id !== id) {
+      return { ok: false, error: 'Another account already uses this email.', field: 'email' };
+    }
+    updateProfileStmt.run(trimmedName, normalized, id);
+    return { ok: true, user: toPublicUser(this.findById(id)) };
+  },
+
+  /**
+   * Change the password. Requires the current password to match.
+   * @returns {{ ok: true } | { ok: false, error: string, field?: string }}
+   */
+  changePassword(id, { currentPassword, newPassword }) {
+    const row = this.findById(id);
+    if (!row) return { ok: false, error: 'Account not found.' };
+    if (!currentPassword || !bcrypt.compareSync(currentPassword, row.password)) {
+      return { ok: false, error: 'Your current password is incorrect.', field: 'currentPassword' };
+    }
+    if (!newPassword || String(newPassword).length < 8) {
+      return { ok: false, error: 'New password must be at least 8 characters.', field: 'newPassword' };
+    }
+    if (bcrypt.compareSync(newPassword, row.password)) {
+      return { ok: false, error: 'New password must be different from the current one.', field: 'newPassword' };
+    }
+    updatePasswordStmt.run(bcrypt.hashSync(newPassword, SALT_ROUNDS), id);
+    return { ok: true };
   },
 };
