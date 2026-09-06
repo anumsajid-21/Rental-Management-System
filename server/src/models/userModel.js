@@ -8,42 +8,43 @@ const SALT_ROUNDS = 10;
 const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const findByIdStmt = db.prepare('SELECT * FROM users WHERE id = ?');
 const emailExistsStmt = db.prepare('SELECT 1 FROM users WHERE email = ?');
-const emailExistsExceptStmt = db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?');
 const insertStmt = db.prepare(
-  'INSERT INTO users (id, name, email, password, role, phone) VALUES (?, ?, ?, ?, ?, ?)'
+  'INSERT INTO users (id, name, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)'
 );
-const updateProfileWithPhoneStmt = db.prepare(
-  'UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?'
+const updateStmt = db.prepare(
+  'UPDATE users SET name = ?, email = ?, role = ?, status = ? WHERE id = ?'
 );
-const updateProfileStmt = db.prepare(
-  'UPDATE users SET name = ?, email = ? WHERE id = ?'
+const updateStatusStmt = db.prepare(
+  'UPDATE users SET status = ? WHERE id = ?'
 );
-const updatePasswordStmt = db.prepare(
-  'UPDATE users SET password = ? WHERE id = ?'
-);
+const listStmt = db.prepare(`
+  SELECT * FROM users 
+  WHERE (name LIKE ? OR email LIKE ? OR ? = '')
+    AND (? = '' OR role = ?)
+    AND (? = '' OR status = ?)
+  ORDER BY created_at DESC
+  LIMIT ? OFFSET ?
+`);
+const countStmt = db.prepare(`
+  SELECT COUNT(*) as count FROM users 
+  WHERE (name LIKE ? OR email LIKE ? OR ? = '')
+    AND (? = '' OR role = ?)
+    AND (? = '' OR status = ?)
+`);
 
 export function toPublicUser(row) {
-  return {
-    id: row.id,
-    name: row.name,
-    email: row.email,
-    role: row.role,
-    phone: row.phone || '',
-    createdAt: row.created_at,
-  };
+  return { id: row.id, name: row.name, email: row.email, role: row.role, status: row.status || 'active', createdAt: row.created_at };
 }
 
 export const userModel = {
   findByEmail: (email) => findByEmailStmt.get(email.trim().toLowerCase()),
   findById: (id) => findByIdStmt.get(id),
   emailExists: (email) => Boolean(emailExistsStmt.get(email.trim().toLowerCase())),
-  emailExistsExcept: (email, exceptId) =>
-    Boolean(emailExistsExceptStmt.get(email.trim().toLowerCase(), exceptId)),
 
   /**
    * @returns {{ ok: true, user: object } | { ok: false, error: string }}
    */
-  create({ name, email, password, role, phone }) {
+  create({ name, email, password, role, status = 'active' }) {
     const normalized = email.trim().toLowerCase();
     if (!Object.values(ROLES).includes(role)) {
       return { ok: false, error: 'Invalid role selected.' };
@@ -53,7 +54,7 @@ export const userModel = {
     }
     const id = crypto.randomUUID();
     const hash = bcrypt.hashSync(password, SALT_ROUNDS);
-    insertStmt.run(id, name.trim(), normalized, hash, role, phone || null);
+    insertStmt.run(id, name.trim(), normalized, hash, role, status);
     return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
   },
 
@@ -69,51 +70,81 @@ export const userModel = {
   },
 
   /**
-   * Update profile. Supports tenant (name/email/phone → returns user) and
-   * owner (name/email with validation → returns { ok, user|error }).
+   * @returns {{ ok: true, user: object } | { ok: false, error: string }}
    */
-  updateProfile(id, { name, email, phone }) {
-    const row = this.findById(id);
-    if (!row) return { ok: false, error: 'Account not found.' };
-
-    const trimmedName = String(name || '').trim();
-    const normalized = String(email || '').trim().toLowerCase();
-    if (!trimmedName) return { ok: false, error: 'Name is required.', field: 'name' };
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
-      return { ok: false, error: 'A valid email is required.', field: 'email' };
+  update(id, { name, email, role, status }) {
+    const row = findByIdStmt.get(id);
+    if (!row) {
+      return { ok: false, error: 'User not found.' };
     }
-    const existing = this.findByEmail(normalized);
-    if (existing && existing.id !== id) {
-      return { ok: false, error: 'Another account already uses this email.', field: 'email' };
+    
+    if (role && !Object.values(ROLES).includes(role)) {
+      return { ok: false, error: 'Invalid role selected.' };
     }
-
-    if (phone !== undefined) {
-      updateProfileWithPhoneStmt.run(trimmedName, normalized, phone || null, id);
-      // Tenant controller expects the public user object directly.
-      return toPublicUser(this.findById(id));
+    
+    if (status && !['active', 'inactive', 'deactivated'].includes(status)) {
+      return { ok: false, error: 'Invalid status selected.' };
     }
 
-    updateProfileStmt.run(trimmedName, normalized, id);
-    return { ok: true, user: toPublicUser(this.findById(id)) };
+    const normalizedEmail = email ? email.trim().toLowerCase() : row.email;
+    if (email && normalizedEmail !== row.email && this.emailExists(normalizedEmail)) {
+      return { ok: false, error: 'An account with this email already exists.' };
+    }
+
+    updateStmt.run(
+      name || row.name,
+      normalizedEmail,
+      role || row.role,
+      status !== undefined ? status : row.status,
+      id
+    );
+    
+    return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
   },
 
   /**
-   * Change the password. Requires the current password to match.
-   * @returns {{ ok: true } | { ok: false, error: string, field?: string }}
+   * @returns {{ ok: true, user: object } | { ok: false, error: string }}
    */
-  changePassword(id, { currentPassword, newPassword }) {
-    const row = this.findById(id);
-    if (!row) return { ok: false, error: 'Account not found.' };
-    if (!currentPassword || !bcrypt.compareSync(currentPassword, row.password)) {
-      return { ok: false, error: 'Your current password is incorrect.', field: 'currentPassword' };
+  updateStatus(id, status) {
+    const row = findByIdStmt.get(id);
+    if (!row) {
+      return { ok: false, error: 'User not found.' };
     }
-    if (!newPassword || String(newPassword).length < 8) {
-      return { ok: false, error: 'New password must be at least 8 characters.', field: 'newPassword' };
+    
+    if (!['active', 'inactive', 'deactivated'].includes(status)) {
+      return { ok: false, error: 'Invalid status selected.' };
     }
-    if (bcrypt.compareSync(newPassword, row.password)) {
-      return { ok: false, error: 'New password must be different from the current one.', field: 'newPassword' };
-    }
-    updatePasswordStmt.run(bcrypt.hashSync(newPassword, SALT_ROUNDS), id);
-    return { ok: true };
+
+    updateStatusStmt.run(status, id);
+    return { ok: true, user: toPublicUser(findByIdStmt.get(id)) };
+  },
+
+  /**
+   * @returns {{ users: array, total: number }}
+   */
+  list({ search = '', role = '', status = '', page = 1, limit = 20 }) {
+    const offset = (page - 1) * limit;
+    const searchPattern = search ? `%${search}%` : '';
+    
+    const users = listStmt.all(
+      searchPattern, searchPattern, search,
+      role, role,
+      status, status,
+      limit, offset
+    );
+    
+    const { count } = countStmt.get(
+      searchPattern, searchPattern, search,
+      role, role,
+      status, status
+    );
+    
+    return {
+      users: users.map(toPublicUser),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit)
+    };
   },
 };

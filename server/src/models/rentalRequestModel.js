@@ -1,74 +1,69 @@
-import crypto from 'node:crypto';
 import { db } from '../db/database.js';
 
-const SELECT_BASE = `
-  SELECT rr.*, p.name AS property_name, p.location AS property_location, un.unit_number
+const listStmt = db.prepare(`
+  SELECT 
+    rr.*,
+    t.name as tenant_name,
+    t.email as tenant_email,
+    p.name as property_name,
+    p.city as property_city,
+    u.unit_number,
+    u.rent_amount
   FROM rental_requests rr
-  JOIN properties p ON p.id = rr.property_id
-  JOIN units un ON un.id = rr.unit_id
-`;
+  JOIN users t ON rr.tenant_id = t.id
+  JOIN properties p ON rr.property_id = p.id
+  JOIN units u ON rr.unit_id = u.id
+  WHERE (? = '' OR rr.status = ?)
+  ORDER BY rr.created_at DESC
+  LIMIT ? OFFSET ?
+`);
+const countStmt = db.prepare(`
+  SELECT COUNT(*) as count
+  FROM rental_requests
+  WHERE (? = '' OR status = ?)
+`);
+const countByStatusStmt = db.prepare(`
+  SELECT status, COUNT(*) as count
+  FROM rental_requests
+  GROUP BY status
+`);
 
-function mapRequest(row) {
-  if (!row) return null;
+export function toPublicRentalRequest(row) {
   return {
     id: row.id,
     tenantId: row.tenant_id,
+    tenantName: row.tenant_name,
+    tenantEmail: row.tenant_email,
     propertyId: row.property_id,
-    unitId: row.unit_id,
-    monthlyRent: row.monthly_rent,
-    moveInDate: row.move_in_date,
-    status: row.status,
     propertyName: row.property_name,
-    propertyLocation: row.property_location,
+    propertyCity: row.property_city,
+    unitId: row.unit_id,
     unitNumber: row.unit_number,
+    rentAmount: row.rent_amount,
+    status: row.status,
+    message: row.message,
     createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    updatedAt: row.updated_at
   };
 }
 
-const insertStmt = db.prepare(`
-  INSERT INTO rental_requests (id, tenant_id, property_id, unit_id, monthly_rent, move_in_date)
-  VALUES (?, ?, ?, ?, ?, ?)
-`);
-
 export const rentalRequestModel = {
-  create({ tenantId, propertyId, unitId, monthlyRent, moveInDate }) {
-    const id = crypto.randomUUID();
-    insertStmt.run(id, tenantId, propertyId, unitId, monthlyRent, moveInDate);
-    return this.findById(id);
+  list: ({ status = '', page = 1, limit = 20 }) => {
+    const offset = (page - 1) * limit;
+    
+    const requests = listStmt.all(status, status, limit, offset);
+    const { count } = countStmt.get(status, status);
+    
+    return {
+      requests: requests.map(toPublicRentalRequest),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit)
+    };
   },
 
-  findById(id) {
-    return mapRequest(db.prepare(`${SELECT_BASE} WHERE rr.id = ?`).get(id));
-  },
-
-  /** Tenant-scoped lookup: a tenant can only ever read their own request. */
-  findByIdForTenant(id, tenantId) {
-    return mapRequest(
-      db.prepare(`${SELECT_BASE} WHERE rr.id = ? AND rr.tenant_id = ?`).get(id, tenantId)
-    );
-  },
-
-  listByTenant(tenantId) {
-    return db
-      .prepare(`${SELECT_BASE} WHERE rr.tenant_id = ? ORDER BY rr.created_at DESC`)
-      .all(tenantId)
-      .map(mapRequest);
-  },
-
-  hasPendingForUnit(tenantId, unitId) {
-    return Boolean(
-      db
-        .prepare(`SELECT 1 FROM rental_requests WHERE tenant_id = ? AND unit_id = ? AND status = 'pending'`)
-        .get(tenantId, unitId)
-    );
-  },
-
-  /** Only valid on pending requests — the statement guards the status. */
-  cancel(id) {
-    db.prepare(
-      `UPDATE rental_requests SET status = 'cancelled', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
-       WHERE id = ? AND status = 'pending'`
-    ).run(id);
+  getCountsByStatus: () => {
+    return countByStatusStmt.all();
   },
 };

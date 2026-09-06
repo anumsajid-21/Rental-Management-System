@@ -1,57 +1,69 @@
 import { db } from '../db/database.js';
 
-const SELECT_BASE = `
-  SELECT r.*, p.name AS property_name,
-         COALESCE(NULLIF(p.location, ''), p.address) AS property_location,
-         un.unit_number, ow.name AS owner_name
+const listStmt = db.prepare(`
+  SELECT 
+    r.*,
+    t.name as tenant_name,
+    t.email as tenant_email,
+    p.name as property_name,
+    p.city as property_city,
+    u.unit_number
   FROM rentals r
-  JOIN properties p ON p.id = r.property_id
-  LEFT JOIN units un ON un.id = r.unit_id
-  LEFT JOIN users ow ON ow.id = COALESCE(r.owner_id, p.owner_id)
-`;
+  JOIN users t ON r.tenant_id = t.id
+  JOIN properties p ON r.property_id = p.id
+  JOIN units u ON r.unit_id = u.id
+  WHERE (? = '' OR r.status = ?)
+  ORDER BY r.created_at DESC
+  LIMIT ? OFFSET ?
+`);
+const countStmt = db.prepare(`
+  SELECT COUNT(*) as count
+  FROM rentals
+  WHERE (? = '' OR status = ?)
+`);
+const countByStatusStmt = db.prepare(`
+  SELECT status, COUNT(*) as count
+  FROM rentals
+  GROUP BY status
+`);
 
-function mapRental(row) {
-  if (!row) return null;
+export function toPublicRental(row) {
   return {
     id: row.id,
     tenantId: row.tenant_id,
+    tenantName: row.tenant_name,
+    tenantEmail: row.tenant_email,
     propertyId: row.property_id,
-    unitId: row.unit_id,
-    ownerId: row.owner_id,
-    monthlyRent: row.monthly_rent,
-    startDate: row.start_date,
-    endDate: row.end_date || null,
-    status: row.status,
     propertyName: row.property_name,
-    propertyLocation: row.property_location,
+    propertyCity: row.property_city,
+    unitId: row.unit_id,
     unitNumber: row.unit_number,
-    ownerName: row.owner_name,
+    rentAmount: row.rent_amount,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    status: row.status,
     createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    updatedAt: row.updated_at
   };
 }
 
 export const rentalModel = {
-  findActiveByTenant(tenantId) {
-    return mapRental(
-      db
-        .prepare(`${SELECT_BASE} WHERE r.tenant_id = ? AND r.status = 'active' ORDER BY r.created_at DESC`)
-        .get(tenantId)
-    );
+  list: ({ status = '', page = 1, limit = 20 }) => {
+    const offset = (page - 1) * limit;
+    
+    const rentals = listStmt.all(status, status, limit, offset);
+    const { count } = countStmt.get(status, status);
+    
+    return {
+      rentals: rentals.map(toPublicRental),
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit)
+    };
   },
 
-  listByTenant(tenantId) {
-    return db
-      .prepare(`${SELECT_BASE} WHERE r.tenant_id = ? ORDER BY r.created_at DESC`)
-      .all(tenantId)
-      .map(mapRental);
-  },
-
-  hasActiveRentalForUnit(tenantId, unitId) {
-    return Boolean(
-      db
-        .prepare(`SELECT 1 FROM rentals WHERE tenant_id = ? AND unit_id = ? AND status = 'active'`)
-        .get(tenantId, unitId)
-    );
+  getCountsByStatus: () => {
+    return countByStatusStmt.all();
   },
 };
