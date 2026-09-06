@@ -19,8 +19,6 @@ db.pragma('foreign_keys = ON');
  * Schema migrations. Add new entries to the bottom of this list — each runs
  * once (tracked in the _migrations table), so every teammate's clone converges
  * to the same schema with just `npm run init-db`.
- *
- * Unified schema supporting both Tenant Portal and Owner Portal modules.
  */
 const MIGRATIONS = [
   {
@@ -39,7 +37,6 @@ const MIGRATIONS = [
     `,
   },
   {
-<<<<<<< HEAD
     id: '002_create_properties',
     up: `
       CREATE TABLE IF NOT EXISTS properties (
@@ -61,33 +58,6 @@ const MIGRATIONS = [
   {
     id: '003_create_units',
     up: `
-=======
-    id: '002_unified_core_tables',
-    up: `
-      ALTER TABLE users ADD COLUMN phone TEXT;
-
-      CREATE TABLE IF NOT EXISTS properties (
-        id            TEXT PRIMARY KEY,
-        owner_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        name          TEXT NOT NULL,
-        location      TEXT NOT NULL DEFAULT '',
-        address       TEXT NOT NULL DEFAULT '',
-        city          TEXT,
-        property_type TEXT NOT NULL DEFAULT 'apartment',
-        description   TEXT NOT NULL DEFAULT '',
-        bedrooms      INTEGER NOT NULL DEFAULT 0,
-        bathrooms     INTEGER NOT NULL DEFAULT 0,
-        rent          REAL NOT NULL DEFAULT 0,
-        monthly_rent  REAL NOT NULL DEFAULT 0,
-        amenities     TEXT NOT NULL DEFAULT '[]',
-        image_url     TEXT,
-        status        TEXT NOT NULL DEFAULT 'available',
-        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-        updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      );
-      CREATE INDEX IF NOT EXISTS idx_properties_owner ON properties (owner_id);
-
->>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
       CREATE TABLE IF NOT EXISTS units (
         id          TEXT PRIMARY KEY,
         property_id TEXT NOT NULL,
@@ -129,7 +99,6 @@ const MIGRATIONS = [
     id: '005_create_rentals',
     up: `
       CREATE TABLE IF NOT EXISTS rentals (
-<<<<<<< HEAD
         id          TEXT PRIMARY KEY,
         tenant_id   TEXT NOT NULL,
         property_id TEXT NOT NULL,
@@ -196,82 +165,6 @@ const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS idx_maintenance_property ON maintenance_requests (property_id);
       CREATE INDEX IF NOT EXISTS idx_maintenance_status ON maintenance_requests (status);
       CREATE INDEX IF NOT EXISTS idx_maintenance_priority ON maintenance_requests (priority);
-=======
-        id           TEXT PRIMARY KEY,
-        tenant_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        property_id  TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-        unit_id      TEXT REFERENCES units(id) ON DELETE SET NULL,
-        owner_id     TEXT REFERENCES users(id) ON DELETE SET NULL,
-        monthly_rent REAL NOT NULL,
-        start_date   TEXT NOT NULL,
-        end_date     TEXT,
-        status       TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'ended')),
-        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-        updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      );
-      CREATE INDEX IF NOT EXISTS idx_rentals_property ON rentals (property_id);
-      CREATE INDEX IF NOT EXISTS idx_rentals_tenant ON rentals (tenant_id, status);
-
-      CREATE TABLE IF NOT EXISTS rent_payments (
-        id           TEXT PRIMARY KEY,
-        rental_id    TEXT NOT NULL REFERENCES rentals(id),
-        property_id  TEXT NOT NULL REFERENCES properties(id),
-        tenant_id    TEXT NOT NULL REFERENCES users(id),
-        rent_month   TEXT NOT NULL,
-        amount       REAL NOT NULL,
-        due_date     TEXT NOT NULL,
-        payment_date TEXT,
-        method       TEXT,
-        notes        TEXT,
-        status       TEXT NOT NULL DEFAULT 'pending'
-                     CHECK (status IN ('pending','paid','overdue')),
-        created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_rent_payment_month ON rent_payments (rental_id, rent_month);
-      CREATE INDEX IF NOT EXISTS idx_rent_payments_property ON rent_payments (property_id);
-
-      CREATE TABLE IF NOT EXISTS transactions (
-        id              TEXT PRIMARY KEY,
-        owner_id        TEXT REFERENCES users(id),
-        tenant_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        property_id     TEXT REFERENCES properties(id),
-        rental_id       TEXT REFERENCES rentals(id) ON DELETE CASCADE,
-        rent_payment_id TEXT REFERENCES rent_payments(id),
-        rent_month      TEXT,
-        type            TEXT DEFAULT 'rent_payment'
-                        CHECK (type IS NULL OR type IN ('rent_payment','refund')),
-        amount          REAL NOT NULL,
-        payment_date    TEXT,
-        status          TEXT NOT NULL DEFAULT 'pending',
-        reference       TEXT,
-        created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-        updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      );
-      CREATE INDEX IF NOT EXISTS idx_transactions_owner ON transactions (owner_id);
-      CREATE INDEX IF NOT EXISTS idx_transactions_tenant ON transactions (tenant_id, rent_month);
-
-      CREATE TABLE IF NOT EXISTS maintenance_requests (
-        id             TEXT PRIMARY KEY,
-        property_id    TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-        tenant_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        unit_id        TEXT REFERENCES units(id) ON DELETE SET NULL,
-        category       TEXT,
-        title          TEXT NOT NULL,
-        description    TEXT NOT NULL,
-        priority       TEXT NOT NULL DEFAULT 'medium'
-                       CHECK (priority IN ('low','medium','high')),
-        status         TEXT NOT NULL DEFAULT 'submitted'
-                       CHECK (status IN ('submitted','in_progress','resolved','rejected')),
-        owner_response TEXT,
-        created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-        updated_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-      );
-      CREATE INDEX IF NOT EXISTS idx_maintenance_property ON maintenance_requests (property_id);
-      CREATE INDEX IF NOT EXISTS idx_maintenance_tenant ON maintenance_requests (tenant_id, status);
-
-      CREATE INDEX IF NOT EXISTS idx_units_property ON units (property_id);
-      CREATE INDEX IF NOT EXISTS idx_rental_requests_tenant ON rental_requests (tenant_id, status);
->>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
     `,
   },
 ];

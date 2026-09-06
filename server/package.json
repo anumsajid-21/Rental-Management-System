@@ -7,14 +7,7 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "init-db": "node src/db/initDb.js",
-<<<<<<< HEAD
-    "seed:dev": "node src/db/seedDev.js",
-    "seed": "node src/db/seed.js"
-=======
-    "seed": "node src/db/seed.js",
-    "seed:dev": "node src/db/seedDev.js"
->>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
+    "init-db": "node src/db/initDb.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

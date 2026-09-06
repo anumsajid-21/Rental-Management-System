@@ -1,6 +1,5 @@
 import { db } from '../db/database.js';
 
-<<<<<<< HEAD
 const listStmt = db.prepare(`
   SELECT 
     t.*,
@@ -60,39 +59,6 @@ const totalRevenueStmt = db.prepare(`
   FROM transactions
   WHERE status = 'paid'
 `);
-=======
-const listFilteredStmt = db.prepare(
-  `SELECT t.*, u.name AS tenant_name, p.name AS property_name, COALESCE(t.rent_month, rp.rent_month) AS rent_month
-   FROM transactions t
-   JOIN users u ON u.id = t.tenant_id
-   LEFT JOIN properties p ON p.id = t.property_id
-   LEFT JOIN rent_payments rp ON rp.id = t.rent_payment_id
-   WHERE t.owner_id = @ownerId
-     AND (@search IS NULL OR u.name LIKE '%' || @search || '%' OR p.name LIKE '%' || @search || '%' OR t.id LIKE '%' || @search || '%')
-     AND (@status IS NULL OR t.status = @status)
-     AND (@type IS NULL OR t.type = @type)
-   ORDER BY t.created_at DESC`
-);
-
-const findOwnedStmt = db.prepare(
-  `SELECT t.*, u.name AS tenant_name, u.email AS tenant_email,
-          p.name AS property_name, COALESCE(p.address, p.location) AS property_address,
-          COALESCE(t.rent_month, rp.rent_month) AS rent_month
-   FROM transactions t
-   JOIN users u ON u.id = t.tenant_id
-   LEFT JOIN properties p ON p.id = t.property_id
-   LEFT JOIN rent_payments rp ON rp.id = t.rent_payment_id
-   WHERE t.id = ? AND t.owner_id = ?`
-);
-
-const SELECT_BASE = `
-  SELECT t.*, p.name AS property_name, un.unit_number
-  FROM transactions t
-  LEFT JOIN rentals r ON r.id = t.rental_id
-  LEFT JOIN properties p ON p.id = COALESCE(t.property_id, r.property_id)
-  LEFT JOIN units un ON un.id = r.unit_id
-`;
->>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
 
 export function toPublicTransaction(row) {
   return {
@@ -116,7 +82,6 @@ export function toPublicTransaction(row) {
 }
 
 export const transactionModel = {
-<<<<<<< HEAD
   list: ({ 
     status = '', 
     tenantId = '', 
@@ -137,45 +102,6 @@ export const transactionModel = {
       startDate, startDate,
       endDate, endDate,
       limit, offset
-=======
-  list(ownerId, { search, status, type } = {}) {
-    const s = search && String(search).trim() ? String(search).trim() : null;
-    const st = status && status !== 'all' ? status : null;
-    const ty = type && type !== 'all' ? type : null;
-    return listFilteredStmt.all({ ownerId, search: s, status: st, type: ty });
-  },
-
-  /** Authorisation-safe: transaction only if it belongs to this owner. */
-  findByIdAndOwner: (id, ownerId) => findOwnedStmt.get(id, ownerId) || null,
-
-  /** Tenant-scoped list with optional status + rent-month range filters. */
-  listByTenant(tenantId, filters = {}) {
-    const clauses = ['t.tenant_id = ?'];
-    const params = [tenantId];
-    if (filters.status) {
-      clauses.push('t.status = ?');
-      params.push(filters.status);
-    }
-    if (filters.fromMonth) {
-      clauses.push('t.rent_month >= ?');
-      params.push(filters.fromMonth);
-    }
-    if (filters.toMonth) {
-      clauses.push('t.rent_month <= ?');
-      params.push(filters.toMonth);
-    }
-    return db
-      .prepare(
-        `${SELECT_BASE} WHERE ${clauses.join(' AND ')} ORDER BY t.rent_month DESC, t.created_at DESC`
-      )
-      .all(...params)
-      .map(mapTransaction);
-  },
-
-  findByIdForTenant(id, tenantId) {
-    return mapTransaction(
-      db.prepare(`${SELECT_BASE} WHERE t.id = ? AND t.tenant_id = ?`).get(id, tenantId)
->>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
     );
     
     const { count } = countStmt.get(
