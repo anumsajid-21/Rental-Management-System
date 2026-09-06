@@ -1,5 +1,6 @@
 import { db } from '../db/database.js';
 
+<<<<<<< HEAD
 const listStmt = db.prepare(`
   SELECT 
     r.*,
@@ -26,6 +27,17 @@ const countByStatusStmt = db.prepare(`
   FROM rentals
   GROUP BY status
 `);
+=======
+const SELECT_BASE = `
+  SELECT r.*, p.name AS property_name,
+         COALESCE(NULLIF(p.location, ''), p.address) AS property_location,
+         un.unit_number, ow.name AS owner_name
+  FROM rentals r
+  JOIN properties p ON p.id = r.property_id
+  LEFT JOIN units un ON un.id = r.unit_id
+  LEFT JOIN users ow ON ow.id = COALESCE(r.owner_id, p.owner_id)
+`;
+>>>>>>> 89a2e32bf6f31a866729cdbd13dfda64daff2406
 
 export function toPublicRental(row) {
   return {
