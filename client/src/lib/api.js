@@ -23,6 +23,7 @@ export async function apiFetch(path, { method = 'GET', body } = {}) {
     res = await fetch(`${BASE}${path}`, {
       method,
       headers: {
+        'ngrok-skip-browser-warning': 'true',
         ...(body ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { FileSpreadsheet, Download } from 'lucide-react';
 import { useOwnerApi } from '../../lib/ownerApi';
 import { PageHeader, Badge, Alert, Loading, EmptyState, Modal, money, dateFmt } from '../../components/ownerUi';
 
@@ -55,6 +56,14 @@ export default function TransactionsPage() {
             <option value="refund">Refund</option>
           </select>
           <button className="btn btn-ghost" onClick={() => load()}>Search</button>
+          <a
+            href="/api/business/export/transactions"
+            className="btn btn-ghost"
+            download
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <FileSpreadsheet size={16} /> Export Excel
+          </a>
         </div>
 
         {transactions === null ? <Loading label="Loading transactions…" /> : transactions.length === 0 ? (
@@ -84,7 +93,22 @@ export default function TransactionsPage() {
       </div>
 
       <Modal open={Boolean(detail)} title="Transaction details" onClose={() => setDetail(null)}
-        footer={<button className="btn btn-primary" onClick={() => setDetail(null)}>Close</button>}>
+        footer={
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
+            {detail && (
+              <a
+                href={`/api/business/receipt/${detail.id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost"
+                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Download size={16} /> PDF Receipt
+              </a>
+            )}
+            <button className="btn btn-primary" onClick={() => setDetail(null)}>Close</button>
+          </div>
+        }>
         {detail && (
           <div className="detail-grid">
             <div className="detail-full"><span>Transaction ID</span><strong className="mono">{detail.id}</strong></div>

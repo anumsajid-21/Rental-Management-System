@@ -4,6 +4,7 @@ async function request(endpoint, options = {}) {
   const token = localStorage.getItem('rms_session');
   const headers = {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
     ...(token && { Authorization: `Bearer ${JSON.parse(token).token}` }),
     ...options.headers,
   };

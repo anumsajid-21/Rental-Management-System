@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ClipboardList } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminRentalRequests() {
@@ -36,10 +37,11 @@ export default function AdminRentalRequests() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PK', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'PKR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
   };
 
   const getCount = (status) => {
@@ -121,7 +123,9 @@ export default function AdminRentalRequests() {
           </div>
         ) : requests.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-state-icon">📋</div>
+            <div className="admin-empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <ClipboardList size={36} strokeWidth={1.75} />
+            </div>
             <div className="admin-empty-state-title">No rental requests found</div>
             <div className="admin-empty-state-description">
               Try adjusting your status filter

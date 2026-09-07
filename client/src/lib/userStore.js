@@ -10,7 +10,10 @@ async function request(path, body) {
   try {
     res = await fetch(`${BASE}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
       body: JSON.stringify(body),
     });
   } catch {
@@ -42,7 +45,10 @@ export function authenticateUser(payload) {
 export async function fetchCurrentUser(token) {
   try {
     const res = await fetch(`${BASE}/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
     });
     if (!res.ok) return null;
     const data = await res.json();

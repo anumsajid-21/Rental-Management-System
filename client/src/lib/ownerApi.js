@@ -18,6 +18,7 @@ export function useOwnerApi() {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
           Authorization: `Bearer ${token}`,
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -33,6 +34,8 @@ export function useOwnerApi() {
   return {
     get: (path) => request(path),
     post: (path, body) => request(path, { method: 'POST', body }),
+    put: (path, body) => request(path, { method: 'PUT', body }),
     patch: (path, body) => request(path, { method: 'PATCH', body }),
+    delete: (path) => request(path, { method: 'DELETE' }),
   };
 }

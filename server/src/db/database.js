@@ -169,6 +169,111 @@ const MIGRATIONS = [
       ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
     `,
   },
+  {
+    id: '004_maintenance_money_transfer',
+    up: `
+      ALTER TABLE maintenance_requests ADD COLUMN amount REAL DEFAULT 0;
+      ALTER TABLE maintenance_requests ADD COLUMN transfer_status TEXT DEFAULT 'none';
+      ALTER TABLE maintenance_requests ADD COLUMN transferred_amount REAL DEFAULT 0;
+      ALTER TABLE maintenance_requests ADD COLUMN transferred_at TEXT;
+    `,
+  },
+  {
+    id: '005_pakistan_legal_ai',
+    up: `
+      CREATE TABLE IF NOT EXISTS legal_sources (
+        id            TEXT PRIMARY KEY,
+        name          TEXT NOT NULL,
+        short_name    TEXT,
+        jurisdiction  TEXT NOT NULL,
+        authority     TEXT NOT NULL,
+        source_type   TEXT NOT NULL,
+        year          INTEGER,
+        source_url    TEXT,
+        is_active     INTEGER NOT NULL DEFAULT 1,
+        verified      INTEGER NOT NULL DEFAULT 1,
+        last_verified TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS legal_knowledge_base (
+        id            TEXT PRIMARY KEY,
+        source_id     TEXT REFERENCES legal_sources(id) ON DELETE CASCADE,
+        jurisdiction  TEXT NOT NULL,
+        category      TEXT NOT NULL,
+        section_rule  TEXT NOT NULL,
+        title         TEXT NOT NULL,
+        summary       TEXT NOT NULL,
+        urdu_summary  TEXT,
+        full_text     TEXT NOT NULL,
+        practical_app TEXT,
+        key_documents TEXT DEFAULT '[]',
+        red_flags     TEXT DEFAULT '[]',
+        authority_ref TEXT,
+        effective_date TEXT,
+        superseded    INTEGER NOT NULL DEFAULT 0,
+        created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+        updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_lkb_jur_cat ON legal_knowledge_base(jurisdiction, category);
+
+      CREATE TABLE IF NOT EXISTS legal_terms (
+        id             TEXT PRIMARY KEY,
+        term_en        TEXT NOT NULL,
+        term_ur        TEXT NOT NULL,
+        term_roman     TEXT NOT NULL,
+        category       TEXT NOT NULL,
+        simple_meaning TEXT NOT NULL,
+        legal_significance TEXT NOT NULL,
+        when_required  TEXT NOT NULL,
+        related_docs   TEXT DEFAULT '[]',
+        common_mistakes TEXT DEFAULT '[]',
+        relevant_authority TEXT NOT NULL,
+        legal_source   TEXT NOT NULL,
+        created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_terms_search ON legal_terms(term_en, term_roman);
+
+      CREATE TABLE IF NOT EXISTS legal_tax_rates (
+        id             TEXT PRIMARY KEY,
+        jurisdiction   TEXT NOT NULL,
+        tax_type       TEXT NOT NULL,
+        filer_type     TEXT NOT NULL,
+        rate_percent   REAL NOT NULL,
+        description    TEXT NOT NULL,
+        statutory_ref  TEXT NOT NULL,
+        effective_from TEXT NOT NULL,
+        effective_to   TEXT,
+        is_active      INTEGER NOT NULL DEFAULT 1
+      );
+
+      CREATE TABLE IF NOT EXISTS legal_societies (
+        id              TEXT PRIMARY KEY,
+        name            TEXT NOT NULL,
+        jurisdiction    TEXT NOT NULL,
+        city            TEXT NOT NULL,
+        authority_type  TEXT NOT NULL,
+        transfer_mode   TEXT NOT NULL,
+        verification_office TEXT NOT NULL,
+        ndc_required    INTEGER NOT NULL DEFAULT 1,
+        common_frauds   TEXT DEFAULT '[]',
+        checklist       TEXT DEFAULT '[]'
+      );
+
+      CREATE TABLE IF NOT EXISTS legal_audit_logs (
+        id              TEXT PRIMARY KEY,
+        user_id         TEXT,
+        query           TEXT NOT NULL,
+        jurisdiction    TEXT,
+        category        TEXT,
+        risk_level      TEXT NOT NULL DEFAULT 'low',
+        escalated       INTEGER NOT NULL DEFAULT 0,
+        citation_status TEXT NOT NULL DEFAULT 'verified',
+        ip_address      TEXT,
+        created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+      );
+    `,
+  },
 ];
 
 export function runMigrations() {
@@ -190,5 +295,8 @@ export function runMigrations() {
   }
 }
 
+import { seedLegalData } from './legalSeed.js';
+
 // Apply migrations on module load so models can prepare statements against the final schema.
 runMigrations();
+seedLegalData();

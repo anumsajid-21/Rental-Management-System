@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { KeyRound } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminRentals() {
@@ -36,10 +37,11 @@ export default function AdminRentals() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PK', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'PKR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
   };
 
   const getCount = (status) => {
@@ -108,7 +110,9 @@ export default function AdminRentals() {
           </div>
         ) : rentals.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-state-icon">🔑</div>
+            <div className="admin-empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <KeyRound size={36} strokeWidth={1.75} />
+            </div>
             <div className="admin-empty-state-title">No rentals found</div>
             <div className="admin-empty-state-description">
               Try adjusting your status filter

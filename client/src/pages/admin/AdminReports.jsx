@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FileCode, FileSpreadsheet, CreditCard, LayoutDashboard, KeyRound, Wrench, BarChart3, Download } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 /**
@@ -185,10 +186,11 @@ export default function AdminReports() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PK', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'PKR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
   };
 
   if (loading) {
@@ -287,22 +289,28 @@ export default function AdminReports() {
             className="admin-action-btn admin-action-btn-secondary"
             onClick={() => handleExport('summary', 'json')}
             disabled={Boolean(exportingFormat)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            {exportingFormat === 'summary-json' ? 'Exporting...' : '📄 JSON Summary'}
+            <FileCode size={15} />
+            {exportingFormat === 'summary-json' ? 'Exporting...' : 'JSON Summary'}
           </button>
           <button
             className="admin-action-btn admin-action-btn-primary"
             onClick={() => handleExport('summary', 'csv')}
             disabled={Boolean(exportingFormat)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            {exportingFormat === 'summary-csv' ? 'Exporting...' : '📊 CSV Summary'}
+            <FileSpreadsheet size={15} />
+            {exportingFormat === 'summary-csv' ? 'Exporting...' : 'CSV Summary'}
           </button>
           <button
             className="admin-action-btn admin-action-btn-primary"
             onClick={() => handleExport('transactions', 'csv')}
             disabled={Boolean(exportingFormat)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            {exportingFormat === 'transactions-csv' ? 'Exporting...' : '💳 CSV Transactions'}
+            <CreditCard size={15} />
+            {exportingFormat === 'transactions-csv' ? 'Exporting...' : 'CSV Transactions'}
           </button>
         </div>
       </div>
@@ -319,66 +327,78 @@ export default function AdminReports() {
         <button
           onClick={() => setActiveTab('overview')}
           style={{
-            padding: '12px 24px',
-            borderRadius: '12px 12px 0 0',
+            padding: '10px 20px',
+            borderRadius: '10px 10px 0 0',
             border: 'none',
             background: activeTab === 'overview' ? 'var(--accent)' : 'transparent',
             color: activeTab === 'overview' ? '#fff' : 'var(--text-muted)',
             fontWeight: 600,
-            fontSize: '0.9rem',
+            fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
             transition: 'all 0.15s'
           }}
         >
-          📌 Visual Overview
+          <LayoutDashboard size={16} /> Visual Overview
         </button>
         <button
           onClick={() => setActiveTab('rentals')}
           style={{
-            padding: '12px 24px',
-            borderRadius: '12px 12px 0 0',
+            padding: '10px 20px',
+            borderRadius: '10px 10px 0 0',
             border: 'none',
             background: activeTab === 'rentals' ? 'var(--accent)' : 'transparent',
             color: activeTab === 'rentals' ? '#fff' : 'var(--text-muted)',
             fontWeight: 600,
-            fontSize: '0.9rem',
+            fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
             transition: 'all 0.15s'
           }}
         >
-          🔑 Rental Charts
+          <KeyRound size={16} /> Rental Charts
         </button>
         <button
           onClick={() => setActiveTab('financials')}
           style={{
-            padding: '12px 24px',
-            borderRadius: '12px 12px 0 0',
+            padding: '10px 20px',
+            borderRadius: '10px 10px 0 0',
             border: 'none',
             background: activeTab === 'financials' ? 'var(--accent)' : 'transparent',
             color: activeTab === 'financials' ? '#fff' : 'var(--text-muted)',
             fontWeight: 600,
-            fontSize: '0.9rem',
+            fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
             transition: 'all 0.15s'
           }}
         >
-          💳 Revenue Graphs
+          <CreditCard size={16} /> Revenue Graphs
         </button>
         <button
           onClick={() => setActiveTab('maintenance')}
           style={{
-            padding: '12px 24px',
-            borderRadius: '12px 12px 0 0',
+            padding: '10px 20px',
+            borderRadius: '10px 10px 0 0',
             border: 'none',
             background: activeTab === 'maintenance' ? 'var(--accent)' : 'transparent',
             color: activeTab === 'maintenance' ? '#fff' : 'var(--text-muted)',
             fontWeight: 600,
-            fontSize: '0.9rem',
+            fontSize: '0.88rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
             transition: 'all 0.15s'
           }}
         >
-          🔧 Maintenance Health
+          <Wrench size={16} /> Maintenance Health
         </button>
       </div>
 

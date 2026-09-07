@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CreditCard } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminTransactions() {
@@ -40,10 +41,11 @@ export default function AdminTransactions() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PK', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'PKR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
   };
 
   const getCount = (status) => {
@@ -124,7 +126,9 @@ export default function AdminTransactions() {
           </div>
         ) : transactions.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-state-icon">💳</div>
+            <div className="admin-empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <CreditCard size={36} strokeWidth={1.75} />
+            </div>
             <div className="admin-empty-state-title">No transactions found</div>
             <div className="admin-empty-state-description">
               Try adjusting your status filter

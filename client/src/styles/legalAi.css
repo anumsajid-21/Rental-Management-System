@@ -1,0 +1,292 @@
+/* ==========================================================================
+   Pakistan Property Legal AI Stylesheet — Integrated into رہائش
+   ========================================================================== */
+
+.legal-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.legal-header-banner {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 28px 32px;
+  box-shadow: 0 10px 25px -5px rgba(6, 78, 59, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legal-header-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legal-header-tagline {
+  color: #a7f3d0;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.legal-disclaimer-pill {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  max-width: 380px;
+  line-height: 1.4;
+}
+
+/* Nav Tabs */
+.legal-nav-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-tab-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.legal-tab-btn:hover {
+  background: var(--bg-accent);
+  color: var(--text);
+}
+
+.legal-tab-btn.active {
+  background: var(--card);
+  color: var(--accent-dark);
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Chat & Q&A */
+.legal-qa-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.legal-control-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legal-select {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.legal-chips-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 16px;
+}
+
+.legal-chip-btn {
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.legal-chip-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border-color: var(--accent);
+}
+
+.legal-response-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  line-height: 1.7;
+}
+
+.legal-response-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legal-pro-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  flex-wrap: wrap;
+}
+
+/* Terminology Dictionary */
+.terms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.term-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.term-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.term-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.term-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.term-urdu {
+  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', serif;
+  font-size: 1.3rem;
+  color: #065f46;
+  direction: rtl;
+}
+
+/* Document Analyzer */
+.score-gauge {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  margin: 0 auto 12px;
+}
+
+.score-high { background: #10b981; }
+.score-med { background: #f59e0b; }
+.score-low { background: #ef4444; }
+
+/* Due Diligence Checklist */
+.checklist-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 5px solid var(--accent);
+}
+
+.checklist-item.critical {
+  border-left-color: #ef4444;
+}
+
+/* Risk Meter */
+.risk-meter-box {
+  padding: 18px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.risk-critical { background: #fee2e2; border: 1.5px solid #f87171; color: #991b1b; }
+.risk-high { background: #ffedd5; border: 1.5px solid #fb923c; color: #9a3412; }
+.risk-medium { background: #fef3c7; border: 1.5px solid #fcd34d; color: #92400e; }
+.risk-low { background: #d1fae5; border: 1.5px solid #6ee7b7; color: #065f46; }
+
+/* Plain Text & Legal Typography */
+.legal-markdown {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+
+.legal-markdown h3 {
+  font-size: 1.05rem;
+  color: #047857;
+  margin: 16px 0 6px;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.legal-markdown p {
+  margin: 6px 0;
+}
+
+.legal-markdown ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.legal-markdown blockquote {
+  background: var(--bg-accent);
+  border-left: 4px solid var(--accent);
+  padding: 8px 14px;
+  margin: 10px 0;
+  border-radius: 0 8px 8px 0;
+}

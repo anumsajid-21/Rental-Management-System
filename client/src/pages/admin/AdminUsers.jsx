@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Users } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminUsers() {
@@ -163,7 +164,9 @@ export default function AdminUsers() {
           </div>
         ) : users.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-state-icon">👥</div>
+            <div className="admin-empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <Users size={36} strokeWidth={1.75} />
+            </div>
             <div className="admin-empty-state-title">No matching users found</div>
             <div className="admin-empty-state-description">
               Try adjusting your search criteria or role filters

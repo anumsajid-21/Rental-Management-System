@@ -19,6 +19,8 @@ export default function TenantMaintenanceNew() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiTips, setAiTips] = useState(null);
 
   const loadRental = useCallback(async () => {
     setRentalState({ loading: true, error: '', hasActiveRental: false });
@@ -38,6 +40,40 @@ export default function TenantMaintenanceNew() {
     setForm((f) => ({ ...f, [field]: e.target.value }));
     setErrors((errs) => ({ ...errs, [field]: undefined }));
     setServerError('');
+  };
+
+  const handleAiTriage = async () => {
+    if (!form.description.trim()) {
+      setErrors((e) => ({ ...e, description: 'Enter some details about the issue first for AI triage.' }));
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai/troubleshoot-maintenance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({ description: form.description }),
+      });
+      const data = await res.json();
+      if (data?.success && data?.data) {
+        const triage = data.data;
+        setForm((prev) => ({
+          ...prev,
+          category: triage.category || prev.category,
+          priority: triage.priority || prev.priority,
+          title: prev.title.trim() ? prev.title : (triage.suggestedTitle || prev.title),
+        }));
+        setAiTips(triage);
+      }
+    } catch (err) {
+      console.error('AI diagnosis error:', err);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const validate = () => {
@@ -156,6 +192,36 @@ export default function TenantMaintenanceNew() {
           error={errors.description}
           maxLength={2000}
         />
+
+        <div style={{ marginTop: '8px', marginBottom: '16px' }}>
+          <button
+            type="button"
+            className="ai-btn-pill"
+            onClick={handleAiTriage}
+            disabled={aiLoading}
+          >
+            <span>✨</span>
+            <span>{aiLoading ? 'Diagnosing with AI…' : 'AI Smart Diagnose & Auto-Categorize'}</span>
+          </button>
+        </div>
+
+        {aiTips && (
+          <div className="ai-smart-assist-box">
+            <div className="ai-smart-assist-header">
+              <span>💡 AI Diagnosis: {aiTips.category} ({aiTips.priority.toUpperCase()} priority)</span>
+            </div>
+            {aiTips.immediateAction && (
+              <p style={{ margin: '4px 0', fontWeight: 600 }}>Safety: {aiTips.immediateAction}</p>
+            )}
+            {aiTips.troubleshootingTips?.length > 0 && (
+              <ul className="ai-smart-assist-tips">
+                {aiTips.troubleshootingTips.map((tip, i) => (
+                  <li key={i}>{tip}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         <div className="form-actions">
           <Link to="/tenant/maintenance" className="btn btn-ghost">

@@ -38,8 +38,8 @@ const updateStatusStmt = db.prepare(
 
 /** Allowed forward-only transitions: submitted → in_progress → resolved. */
 const TRANSITIONS = {
-  submitted: ['in_progress'],
-  in_progress: ['resolved'],
+  submitted: ['in_progress', 'rejected'],
+  in_progress: ['resolved', 'rejected'],
   resolved: [],
   rejected: [],
 };

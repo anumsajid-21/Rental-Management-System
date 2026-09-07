@@ -5,18 +5,26 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "dev": "node --watch src/index.js",
+    "dev": "node --watch --watch-path=src src/index.js",
     "start": "node src/index.js",
     "init-db": "node src/db/initDb.js",
     "seed": "node src/db/seed.js",
     "seed:dev": "node src/db/seedDev.js"
   },
   "dependencies": {
+    "@google/genai": "^2.21.0",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.11.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.2"
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.3.0",
+    "nodemailer": "^10.0.0",
+    "pdfkit": "^0.20.2",
+    "stripe": "^22.6.1",
+    "xlsx": "^0.18.5"
   }
 }

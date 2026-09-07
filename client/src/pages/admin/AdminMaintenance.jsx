@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Wrench } from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminMaintenance() {
@@ -119,7 +120,9 @@ export default function AdminMaintenance() {
           </div>
         ) : requests.length === 0 ? (
           <div className="admin-empty-state">
-            <div className="admin-empty-state-icon">🔧</div>
+            <div className="admin-empty-state-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <Wrench size={36} strokeWidth={1.75} />
+            </div>
             <div className="admin-empty-state-title">No maintenance requests found</div>
             <div className="admin-empty-state-description">
               Try adjusting your status or priority filters

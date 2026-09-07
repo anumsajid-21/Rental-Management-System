@@ -1,8 +1,8 @@
-/** Formatting helpers shared across the tenant portal (Rs. currency, dates). */
+/** Formatting helpers shared across the tenant portal (PKR currency, dates). */
 
 export function formatCurrency(amount) {
   const n = Number(amount) || 0;
-  return `Rs. ${n.toLocaleString('en-PK')}`;
+  return `PKR ${n.toLocaleString('en-PK')}`;
 }
 
 function toDate(value) {

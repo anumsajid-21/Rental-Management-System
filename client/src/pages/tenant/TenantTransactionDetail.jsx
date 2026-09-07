@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
 import { formatCurrency, formatDateLong, formatRentMonth } from '../../lib/format';
 import StatusBadge from '../../components/StatusBadge';
@@ -55,8 +56,22 @@ export default function TenantTransactionDetail() {
 
       <section className="tenant-card">
         <header className="card-head">
-          <h2>Transaction Details</h2>
-          <StatusBadge status={t.status} />
+          <div>
+            <h2>Transaction Details</h2>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <a
+              href={`/api/business/receipt/${t.id}/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost btn-sm"
+              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Download size={15} />
+              <span>Download PDF Receipt (PKR)</span>
+            </a>
+            <StatusBadge status={t.status} />
+          </div>
         </header>
         <div className="detail-grid">
           <div className="detail-item">

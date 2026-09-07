@@ -1,39 +1,34 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
-import BrandLogo from '../components/BrandLogo';
 import '../styles/admin.css';
 
 export default function AdminArea() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="admin-layout">
-      {/* Mobile top bar toggle button */}
-      <div className="admin-mobile-bar" style={{ display: 'none' }}>
-        <button
-          className="admin-mobile-toggle"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle navigation menu"
-        >
-          ☰ Menu
-        </button>
-        <BrandLogo size="sm" portal="admin" showWordmark className="admin-mobile-brand" />
-      </div>
-
-      {mobileOpen && (
-        <div
-          className="modal-overlay"
-          style={{ zIndex: 99 }}
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
+    <div className="app-shell">
       <AdminSidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      <main className="admin-main">
-        <Outlet />
-      </main>
+      <div className="app-main">
+        <header className="app-mobile-bar">
+          <button
+            type="button"
+            className="app-mobile-toggle"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Toggle navigation menu"
+          >
+            <Menu size={22} />
+          </button>
+          <span className="app-mobile-title">Admin Portal</span>
+        </header>
+
+        <main className="admin-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
+

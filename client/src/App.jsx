@@ -34,6 +34,9 @@ import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminMaintenance from './pages/admin/AdminMaintenance';
 import AdminReports from './pages/admin/AdminReports';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminLegalSources from './pages/admin/AdminLegalSources';
+import PakistanLegalAiPage from './pages/legal/PakistanLegalAiPage';
+import AiAssistant from './components/AiAssistant';
 import { ROLES } from './lib/roles';
 
 /**
@@ -46,6 +49,7 @@ export default function App() {
         <Routes>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/legal-ai" element={<PakistanLegalAiPage />} />
 
           <Route
             path="/tenant"
@@ -64,6 +68,7 @@ export default function App() {
             <Route path="maintenance" element={<TenantMaintenance />} />
             <Route path="maintenance/new" element={<TenantMaintenanceNew />} />
             <Route path="maintenance/:requestId" element={<TenantMaintenanceDetail />} />
+            <Route path="legal" element={<PakistanLegalAiPage />} />
             <Route path="profile" element={<TenantProfile />} />
           </Route>
 
@@ -83,6 +88,7 @@ export default function App() {
             <Route path="maintenance" element={<MaintenancePage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="import" element={<ImportCsvPage />} />
+            <Route path="legal" element={<PakistanLegalAiPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
 
@@ -103,11 +109,13 @@ export default function App() {
             <Route path="transactions" element={<AdminTransactions />} />
             <Route path="maintenance" element={<AdminMaintenance />} />
             <Route path="reports" element={<AdminReports />} />
+            <Route path="legal" element={<AdminLegalSources />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/signin" replace />} />
         </Routes>
+        <AiAssistant />
       </BrowserRouter>
     </AuthProvider>
   );

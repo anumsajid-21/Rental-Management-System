@@ -1,4 +1,16 @@
 import { useState, useEffect } from 'react';
+import {
+  Users,
+  Building2,
+  KeyRound,
+  CreditCard,
+  CheckCircle2,
+  Sparkles,
+  Wrench,
+  ClipboardList,
+  BarChart3,
+  TrendingUp,
+} from 'lucide-react';
 import { adminApi } from '../../lib/adminStore';
 
 export default function AdminDashboard() {
@@ -40,14 +52,11 @@ export default function AdminDashboard() {
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return `Rs. ${Number(amount || 0).toLocaleString('en-PK')}`;
   };
 
   const getStatusCount = (byStatus, status) => {
-    const found = byStatus?.find(s => s.status === status);
+    const found = byStatus?.find((s) => s.status === status);
     return found?.count || 0;
   };
 
@@ -65,32 +74,56 @@ export default function AdminDashboard() {
       <div className="admin-header">
         <div className="admin-header-title">
           <h1>Admin Command Dashboard</h1>
-          <p>Welcome back. Real-time platform health, occupancy, and financial summary.</p>
+          <p>Real-time platform operations, occupancy rate, and audited financial overview.</p>
         </div>
       </div>
 
-      {/* Easy Understanding Banner */}
-      <div style={{
-        background: 'var(--card)',
-        border: '1.5px solid var(--border)',
-        borderRadius: '16px',
-        padding: '20px 24px',
-        marginBottom: '28px',
-        boxShadow: '0 2px 8px rgba(60, 70, 60, 0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-          <span style={{ fontSize: '1.2rem' }}>👋</span>
-          <strong style={{ color: 'var(--text)', fontSize: '1rem' }}>Platform Snapshot & Quick Navigation</strong>
+      {/* Quick Navigation Banner */}
+      <div
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)',
+          padding: '18px 22px',
+          marginBottom: '28px',
+          boxShadow: 'var(--shadow)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+        }}
+      >
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'var(--accent-soft)',
+            color: 'var(--accent-dark)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Sparkles size={20} />
         </div>
-        <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Monitor your core operations below. Use the left sidebar to manage <strong>Users</strong>, review <strong>Properties</strong>, audit <strong>Transactions</strong>, and download compliance reports from <strong>Reports</strong>.
-        </p>
+        <div style={{ flex: 1 }}>
+          <strong style={{ color: 'var(--text)', fontSize: '0.96rem', display: 'block' }}>
+            Central Administration & Real-Time Auditing
+          </strong>
+          <p style={{ margin: '2px 0 0', fontSize: '0.86rem', color: 'var(--text-muted)' }}>
+            Monitor your core operations below. Manage <strong>Users</strong>, review <strong>Properties</strong>, audit <strong>Transactions</strong>, and download compliance reports.
+          </p>
+        </div>
       </div>
 
       {/* Primary KPI Cards */}
       <div className="admin-cards">
         <div className="admin-card">
-          <div className="admin-card-label">Total Users</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="admin-card-label">Total Users</div>
+            <Users size={18} color="var(--accent)" />
+          </div>
           <div className="admin-card-value">{data?.stats?.totalUsers || 0}</div>
           <div className="admin-card-trend">
             {data?.stats?.totalTenants || 0} tenants • {data?.stats?.totalOwners || 0} owners
@@ -98,7 +131,10 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-card">
-          <div className="admin-card-label">Properties & Units</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="admin-card-label">Properties & Units</div>
+            <Building2 size={18} color="var(--accent)" />
+          </div>
           <div className="admin-card-value">{data?.stats?.totalProperties || 0}</div>
           <div className="admin-card-trend">
             {totalUnits} total registered units
@@ -106,13 +142,19 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-card">
-          <div className="admin-card-label">Active Rentals</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="admin-card-label">Active Rentals</div>
+            <KeyRound size={18} color="var(--accent)" />
+          </div>
           <div className="admin-card-value">{activeRentals}</div>
           <div className="admin-card-trend positive">Leases currently active</div>
         </div>
 
         <div className="admin-card">
-          <div className="admin-card-label">Total Audited Revenue</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="admin-card-label">Total Audited Revenue</div>
+            <CreditCard size={18} color="var(--accent)" />
+          </div>
           <div className="admin-card-value">
             {formatCurrency(data?.transactions?.totalRevenue || 0)}
           </div>
@@ -120,17 +162,17 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Visual Health Gauge Bars (Used only where needed) */}
+      {/* Visual Health Gauge Bars */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
         <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span className="admin-card-label" style={{ margin: 0 }}>Unit Occupancy Rate</span>
             <strong style={{ color: 'var(--accent-dark)' }}>{occupancyRate}%</strong>
           </div>
-          <div style={{ background: '#e5e7eb', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-accent)', height: '10px', borderRadius: '6px', overflow: 'hidden' }}>
             <div style={{ width: `${occupancyRate}%`, background: 'var(--accent)', height: '100%', borderRadius: '6px' }} />
           </div>
-          <small className="text-muted" style={{ marginTop: '8px', fontSize: '0.8rem' }}>
+          <small className="text-muted" style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             {activeRentals} of {totalUnits} units currently occupied
           </small>
         </div>
@@ -138,12 +180,12 @@ export default function AdminDashboard() {
         <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span className="admin-card-label" style={{ margin: 0 }}>Payment Collection Health</span>
-            <strong style={{ color: '#065f46' }}>{collectionRate}%</strong>
+            <strong style={{ color: 'var(--accent-dark)' }}>{collectionRate}%</strong>
           </div>
-          <div style={{ background: '#e5e7eb', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
-            <div style={{ width: `${collectionRate}%`, background: '#10b981', height: '100%', borderRadius: '6px' }} />
+          <div style={{ background: 'var(--bg-accent)', height: '10px', borderRadius: '6px', overflow: 'hidden' }}>
+            <div style={{ width: `${collectionRate}%`, background: 'var(--accent-dark)', height: '100%', borderRadius: '6px' }} />
           </div>
-          <small className="text-muted" style={{ marginTop: '8px', fontSize: '0.8rem' }}>
+          <small className="text-muted" style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             {paidTransactions} of {totalTransactions} transactions successfully collected
           </small>
         </div>
@@ -151,14 +193,18 @@ export default function AdminDashboard() {
         <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span className="admin-card-label" style={{ margin: 0 }}>Pending Action Items</span>
-            <strong style={{ color: '#92400e' }}>
+            <strong style={{ color: '#b45309' }}>
               {getStatusCount(data?.rentalRequests?.byStatus, 'pending') + getStatusCount(data?.maintenance?.byStatus, 'submitted')} Items
             </strong>
           </div>
-          <small className="text-muted" style={{ fontSize: '0.85rem' }}>
-            📋 {getStatusCount(data?.rentalRequests?.byStatus, 'pending')} rental requests pending review<br />
-            🔧 {getStatusCount(data?.maintenance?.byStatus, 'submitted')} maintenance requests submitted
-          </small>
+          <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <ClipboardList size={14} /> {getStatusCount(data?.rentalRequests?.byStatus, 'pending')} rental requests pending review
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Wrench size={14} /> {getStatusCount(data?.maintenance?.byStatus, 'submitted')} maintenance requests submitted
+            </span>
+          </div>
         </div>
       </div>
 

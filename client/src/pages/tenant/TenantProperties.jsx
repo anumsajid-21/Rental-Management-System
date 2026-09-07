@@ -94,11 +94,11 @@ export default function TenantProperties() {
             placeholder="All types"
           />
           <div className="field">
-            <label htmlFor="prop-min">Min Rent (Rs.)</label>
+            <label htmlFor="prop-min">Min Rent (PKR)</label>
             <input id="prop-min" type="number" min="0" placeholder="0" value={filters.minRent} onChange={setFilter('minRent')} />
           </div>
           <div className="field">
-            <label htmlFor="prop-max">Max Rent (Rs.)</label>
+            <label htmlFor="prop-max">Max Rent (PKR)</label>
             <input id="prop-max" type="number" min="0" placeholder="Any" value={filters.maxRent} onChange={setFilter('maxRent')} />
           </div>
           <SelectField
