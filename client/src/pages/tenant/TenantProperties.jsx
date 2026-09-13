@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LayoutGrid, List } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 import { AVAILABILITY_OPTIONS } from '../../lib/constants';
@@ -29,6 +30,7 @@ export default function TenantProperties() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [applied, setApplied] = useState(EMPTY_FILTERS);
+  const [viewMode, setViewMode] = useState('grid');
   const [state, setState] = useState({ loading: true, error: '', data: null });
 
   const load = useCallback(async (activeFilters) => {
@@ -70,9 +72,29 @@ export default function TenantProperties() {
 
   return (
     <div>
-      <div className="tenant-page-head">
-        <h1>Find a Property</h1>
-        <p>Browse properties that are currently available for rent.</p>
+      <div className="tenant-page-head tenant-page-head-row">
+        <div>
+          <h1>Find a Property</h1>
+          <p>Browse properties that are currently available for rent.</p>
+        </div>
+        <div className="view-toggle-wrap">
+          <button
+            type="button"
+            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => setViewMode('grid')}
+            title="Grid View"
+          >
+            <LayoutGrid size={15} /> Grid
+          </button>
+          <button
+            type="button"
+            className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+            onClick={() => setViewMode('table')}
+            title="Table View"
+          >
+            <List size={15} /> Table
+          </button>
+        </div>
       </div>
 
       <form className="tenant-card filter-card" onSubmit={handleSubmit}>
@@ -140,6 +162,45 @@ export default function TenantProperties() {
             ) : null
           }
         />
+      ) : viewMode === 'table' ? (
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Rooms</th>
+                <th>Monthly Rent</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {properties.map((p) => (
+                <tr key={p.id}>
+                  <td>
+                    <strong style={{ fontSize: '0.98rem' }}>{p.name}</strong>
+                  </td>
+                  <td>{p.location}</td>
+                  <td style={{ textTransform: 'capitalize' }}>{p.propertyType}</td>
+                  <td>{p.bedrooms} Bed, {p.bathrooms} Bath</td>
+                  <td><strong>{formatCurrency(p.rent)}</strong></td>
+                  <td><StatusBadge status={p.status} /></td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => navigate(`/tenant/properties/${p.id}`)}
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div className="property-grid">
           {properties.map((p) => (

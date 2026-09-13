@@ -13,14 +13,33 @@ import {
 import AppSidebar from '../../components/layout/AppSidebar';
 import { useAuth } from '../../context/AuthContext';
 
-const NAV_ITEMS = [
-  { to: '/tenant', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/tenant/properties', label: 'Properties', icon: Building2 },
-  { to: '/tenant/rental', label: 'My Rental', icon: KeyRound },
-  { to: '/tenant/transactions', label: 'Transactions', icon: CreditCard },
-  { to: '/tenant/maintenance', label: 'Maintenance', icon: Wrench },
-  { to: '/tenant/legal', label: 'Legal Assistant', icon: Scale },
-  { to: '/tenant/profile', label: 'Profile', icon: User },
+const NAV_SECTIONS = [
+  {
+    title: 'OVERVIEW',
+    items: [{ to: '/tenant', label: 'Dashboard', icon: LayoutDashboard, end: true }],
+  },
+  {
+    title: 'PORTFOLIO',
+    items: [
+      { to: '/tenant/properties', label: 'Properties', icon: Building2 },
+      { to: '/tenant/rental', label: 'My Rental', icon: KeyRound },
+    ],
+  },
+  {
+    title: 'MANAGEMENT',
+    items: [
+      { to: '/tenant/transactions', label: 'Transactions', icon: CreditCard },
+      { to: '/tenant/maintenance', label: 'Maintenance', icon: Wrench },
+    ],
+  },
+  {
+    title: 'INSIGHTS & LEGAL',
+    items: [{ to: '/tenant/legal', label: 'Legal Assistant', icon: Scale }],
+  },
+  {
+    title: 'ACCOUNT',
+    items: [{ to: '/tenant/profile', label: 'Profile & Security', icon: User }],
+  },
 ];
 
 /**
@@ -41,7 +60,7 @@ export default function TenantLayout() {
       <AppSidebar
         portal="tenant"
         portalTitle="Tenant Portal"
-        links={NAV_ITEMS}
+        links={NAV_SECTIONS}
         user={user}
         onLogout={handleLogout}
         mobileOpen={mobileOpen}

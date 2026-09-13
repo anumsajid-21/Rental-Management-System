@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { LayoutGrid, List, Building2 } from 'lucide-react';
 import { useOwnerApi } from '../../lib/ownerApi';
 import { PageHeader, Badge, Alert, Loading, EmptyState, ErrorState, Modal, money, dateFmt } from '../../components/ownerUi';
 
@@ -39,9 +40,10 @@ export default function OwnerPropertiesPage() {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
 
-  // Filters
+  // Filters & View Mode
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('table');
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -210,7 +212,7 @@ export default function OwnerPropertiesPage() {
 
       <div className="card">
         {/* Search & Status Filter Toolbar */}
-        <div className="toolbar">
+        <div className="toolbar" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <input
             className="toolbar-input"
             placeholder="Search by property name, address, or city…"
@@ -249,6 +251,25 @@ export default function OwnerPropertiesPage() {
               Reset
             </button>
           )}
+
+          <div className="view-toggle-wrap" style={{ marginLeft: 'auto' }}>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+              onClick={() => setViewMode('table')}
+              title="Table View"
+            >
+              <List size={15} /> Table
+            </button>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+            >
+              <LayoutGrid size={15} /> Grid
+            </button>
+          </div>
         </div>
 
         {/* Content list */}
@@ -269,7 +290,7 @@ export default function OwnerPropertiesPage() {
           </EmptyState>
         )}
 
-        {!loading && properties && properties.length > 0 && (
+        {!loading && properties && properties.length > 0 && viewMode === 'table' && (
           <div className="table-wrap">
             <table className="data-table">
               <thead>
@@ -367,6 +388,70 @@ export default function OwnerPropertiesPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!loading && properties && properties.length > 0 && viewMode === 'grid' && (
+          <div className="property-grid" style={{ padding: '20px' }}>
+            {properties.map((prop) => (
+              <article
+                key={prop.id}
+                className="card property-card"
+                style={{ overflow: 'hidden' }}
+              >
+                <div className="property-media">
+                  {prop.image_url ? (
+                    <img src={prop.image_url} alt={prop.name} loading="lazy" />
+                  ) : (
+                    <div className="property-media-placeholder">
+                      <Building2 size={42} strokeWidth={1.6} />
+                    </div>
+                  )}
+                  <span className="property-type-chip" style={{ textTransform: 'capitalize' }}>
+                    {prop.property_type}
+                  </span>
+                </div>
+                <div className="property-body">
+                  <div className="property-title-row">
+                    <h3>{prop.name}</h3>
+                    <Badge value={prop.status} />
+                  </div>
+                  <p className="property-location">
+                    📍 {prop.address}{prop.city ? `, ${prop.city}` : ''}
+                  </p>
+                  <p className="property-meta">
+                    {prop.bedrooms} Beds · {prop.bathrooms} Baths
+                  </p>
+                  {prop.tenant_name && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--accent-dark)', marginTop: '4px' }}>
+                      Tenant: {prop.tenant_name}
+                    </div>
+                  )}
+                  {prop.pending_requests_count > 0 && (
+                    <div style={{ fontSize: '0.8rem', color: '#b45309', fontWeight: 600, marginTop: '2px' }}>
+                      {prop.pending_requests_count} pending request{prop.pending_requests_count > 1 ? 's' : ''}
+                    </div>
+                  )}
+                  <div className="property-foot">
+                    <span className="property-rent">
+                      {money(prop.monthly_rent)}
+                      <small>/mo</small>
+                    </span>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => handleOpenDetail(prop)}>
+                        View
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(prop)}>
+                        Edit
+                      </button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: '#dc2626' }} onClick={() => setDeleteTarget(prop)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </div>

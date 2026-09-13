@@ -112,7 +112,7 @@ export function Modal({ open, title, onClose, children, footer }) {
 }
 
 export const money = (n) =>
-  `Rs. ${Number(n || 0).toLocaleString('en-PK')}`;
+  `PKR ${Number(n || 0).toLocaleString('en-PK')}`;
 
 export const dateFmt = (d) => (d ? new Date(d).toLocaleDateString('en-PK') : '—');
 
