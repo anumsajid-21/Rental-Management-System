@@ -24,6 +24,12 @@ export default function TenantProfile() {
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Security / Password state
+  const [pw, setPw] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwErr, setPwErr] = useState('');
+  const [savingPw, setSavingPw] = useState(false);
+
   const load = useCallback(async () => {
     setState({ loading: true, error: '', data: null });
     const res = await apiFetch('/profile');
@@ -74,6 +80,37 @@ export default function TenantProfile() {
     setState((s) => ({ ...s, data: res.data.user }));
   };
 
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPwMsg('');
+    setPwErr('');
+    if (!pw.currentPassword) {
+      setPwErr('Please enter your current password.');
+      return;
+    }
+    if (!pw.newPassword || pw.newPassword.length < 8) {
+      setPwErr('New password must be at least 8 characters long.');
+      return;
+    }
+    if (pw.newPassword !== pw.confirmPassword) {
+      setPwErr('New password and confirmation do not match.');
+      return;
+    }
+
+    setSavingPw(true);
+    const res = await apiFetch('/profile/password', {
+      method: 'POST',
+      body: { currentPassword: pw.currentPassword, newPassword: pw.newPassword },
+    });
+    setSavingPw(false);
+    if (!res.ok) {
+      setPwErr(res.error);
+      return;
+    }
+    setPwMsg('Password changed successfully.');
+    setPw({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  };
+
   if (state.loading) return <LoadingBlock label="Loading your profile…" />;
   if (state.error) return <ErrorState message={state.error} onRetry={load} />;
 
@@ -82,8 +119,8 @@ export default function TenantProfile() {
   return (
     <div className="profile-page">
       <div className="tenant-page-head">
-        <h1>Profile</h1>
-        <p>View and edit your personal information.</p>
+        <h1>Profile & Security</h1>
+        <p>Manage your personal information and account security.</p>
       </div>
 
       {success && (
@@ -138,6 +175,61 @@ export default function TenantProfile() {
         <div className="form-actions profile-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      </form>
+
+      <form className="tenant-card profile-card" onSubmit={handlePasswordSubmit}>
+        <header className="card-head">
+          <h2>Security — change password</h2>
+        </header>
+        <p className="muted-note" style={{ marginBottom: '16px' }}>
+          For your security, enter your current password to set a new password. Passwords are stored encrypted and securely hashed.
+        </p>
+
+        {pwMsg && (
+          <div className="alert alert-success" role="status" style={{ marginBottom: '16px' }}>
+            {pwMsg}
+          </div>
+        )}
+        {pwErr && (
+          <div className="alert alert-error" role="alert" style={{ marginBottom: '16px' }}>
+            {pwErr}
+          </div>
+        )}
+
+        <div className="profile-fields">
+          <TextField
+            label="Current Password"
+            name="currentPassword"
+            type="password"
+            placeholder="Enter current password"
+            value={pw.currentPassword}
+            onChange={(e) => { setPw((p) => ({ ...p, currentPassword: e.target.value })); setPwErr(''); setPwMsg(''); }}
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <TextField
+              label="New Password"
+              name="newPassword"
+              type="password"
+              placeholder="Min 8 characters"
+              value={pw.newPassword}
+              onChange={(e) => { setPw((p) => ({ ...p, newPassword: e.target.value })); setPwErr(''); setPwMsg(''); }}
+            />
+            <TextField
+              label="Confirm New Password"
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+              value={pw.confirmPassword}
+              onChange={(e) => { setPw((p) => ({ ...p, confirmPassword: e.target.value })); setPwErr(''); setPwMsg(''); }}
+            />
+          </div>
+        </div>
+
+        <div className="form-actions profile-actions">
+          <button type="submit" className="btn btn-primary" disabled={savingPw}>
+            {savingPw ? 'Updating Password…' : 'Change Password'}
           </button>
         </div>
       </form>

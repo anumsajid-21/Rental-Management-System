@@ -50,3 +50,13 @@ export function update(req, res) {
 
   res.json({ user, message: 'Profile updated successfully.' });
 }
+
+export function changePassword(req, res) {
+  const { currentPassword, newPassword } = req.body || {};
+  const result = req.app.get('userModel').changePassword(req.user.id, {
+    currentPassword,
+    newPassword,
+  });
+  if (!result.ok) return res.status(400).json({ error: result.error, field: result.field });
+  res.json({ message: 'Password changed successfully.' });
+}

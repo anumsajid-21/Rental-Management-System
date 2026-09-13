@@ -16,7 +16,7 @@ import {
   list as listMaintenance,
   detail as maintenanceDetail,
 } from '../controllers/maintenanceController.js';
-import { show as showProfile, update as updateProfile } from '../controllers/profileController.js';
+import { show as showProfile, update as updateProfile, changePassword } from '../controllers/profileController.js';
 
 /**
  * Tenant Portal API. Every route requires a valid JWT AND the 'tenant' role,
@@ -52,8 +52,9 @@ router.get('/maintenance', listMaintenance);
 router.post('/maintenance', createMaintenance);
 router.get('/maintenance/:id', maintenanceDetail);
 
-// Profile
+// Profile & Security
 router.get('/profile', showProfile);
 router.patch('/profile', updateProfile);
+router.post('/profile/password', changePassword);
 
 export default router;
