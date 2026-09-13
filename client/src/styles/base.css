@@ -38,8 +38,8 @@ body {
   margin-bottom: 7px;
   color: var(--text);
 }
-.field-input-wrap { position: relative; }
-.field input {
+.field input,
+.field select {
   width: 100%;
   height: 48px;
   padding: 0 16px;
@@ -51,9 +51,11 @@ body {
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
 }
 .field input::placeholder { color: #a9aaa2; }
-.field input:focus {
+.field input:focus,
+.field select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(95, 141, 118, 0.15);
