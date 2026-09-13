@@ -267,21 +267,11 @@ export default function PakistanLegalAiPage() {
   };
 
   return (
-    <div className="legal-page">
-      {/* Banner */}
-      <div className="legal-header-banner">
-        <div>
-          <div className="legal-header-title">
-            <span>🇵🇰 Pakistan Property Legal AI</span>
-          </div>
-          <div className="legal-header-tagline">
-            Understand Pakistani Property Law — Before You Sign.
-          </div>
-        </div>
-        <div className="legal-disclaimer-pill">
-          ⚖️ <strong>Legal Information Notice:</strong> Provides statutory explanations and risk screening under Pakistani law. Does not constitute lawyer representation.
-        </div>
-      </div>
+    <div className="page legal-page">
+      <PageHeader
+        title="Pakistan Property Legal AI"
+        subtitle="Understand Pakistani Property Law — Statutory guidance, document verification, and risk screening before you sign."
+      />
 
       {/* Navigation Tabs */}
       <nav className="legal-nav-tabs">
@@ -289,19 +279,19 @@ export default function PakistanLegalAiPage() {
           className={`legal-tab-btn ${activeTab === 'qa' ? 'active' : ''}`}
           onClick={() => setActiveTab('qa')}
         >
-          💬 Legal Q&A (پرسش و جواب)
+          💬 Legal Q&A
         </button>
         <button
           className={`legal-tab-btn ${activeTab === 'terms' ? 'active' : ''}`}
           onClick={() => setActiveTab('terms')}
         >
-          📖 Legal Dictionary (لغت)
+          📖 Legal Dictionary
         </button>
         <button
           className={`legal-tab-btn ${activeTab === 'analyzer' ? 'active' : ''}`}
           onClick={() => setActiveTab('analyzer')}
         >
-          🔍 Document Analyzer (معاہدہ کی جانچ)
+          🔍 Document Analyzer
         </button>
         <button
           className={`legal-tab-btn ${activeTab === 'due_diligence' ? 'active' : ''}`}
@@ -310,7 +300,7 @@ export default function PakistanLegalAiPage() {
             if (!ddResult) handleRunDueDiligence();
           }}
         >
-          📋 Due Diligence Wizard (تصدیق)
+          📋 Due Diligence Wizard
         </button>
         <button
           className={`legal-tab-btn ${activeTab === 'scam_check' ? 'active' : ''}`}
@@ -319,7 +309,7 @@ export default function PakistanLegalAiPage() {
             if (!scamResult) handleCheckScamRisk();
           }}
         >
-          🛡️ Scam Risk Checker (فراڈ چیکر)
+          🛡️ Scam Risk Checker
         </button>
         <button
           className={`legal-tab-btn ${activeTab === 'tax_calc' ? 'active' : ''}`}
@@ -334,7 +324,7 @@ export default function PakistanLegalAiPage() {
           className={`legal-tab-btn ${activeTab === 'letters' ? 'active' : ''}`}
           onClick={() => setActiveTab('letters')}
         >
-          ✉️ Legal Notices & Drafts (خطوط)
+          ✉️ Legal Notices & Drafts
         </button>
       </nav>
 

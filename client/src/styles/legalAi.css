@@ -3,51 +3,9 @@
    ========================================================================== */
 
 .legal-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px 60px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.legal-header-banner {
-  background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
-  color: #fff;
-  border-radius: 20px;
-  padding: 28px 32px;
-  box-shadow: 0 10px 25px -5px rgba(6, 78, 59, 0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.legal-header-title {
-  font-size: 1.65rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legal-header-tagline {
-  color: #a7f3d0;
-  font-size: 0.98rem;
-  font-weight: 500;
-}
-
-.legal-disclaimer-pill {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
-  padding: 8px 14px;
-  font-size: 0.82rem;
-  max-width: 380px;
-  line-height: 1.4;
+  gap: 20px;
 }
 
 /* Nav Tabs */
@@ -55,8 +13,13 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+}
+.legal-nav-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari */
 }
 
 .legal-tab-btn {
