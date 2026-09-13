@@ -201,9 +201,29 @@ export default function OwnerPropertiesPage() {
         title="Properties"
         subtitle="Manage your individual properties, update rental pricing and monitor occupancy."
         actions={
-          <button className="btn btn-primary" onClick={handleOpenAdd}>
-            + Add Property
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="view-toggle-wrap">
+              <button
+                type="button"
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+              >
+                <LayoutGrid size={15} /> Grid
+              </button>
+              <button
+                type="button"
+                className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+                title="Table View"
+              >
+                <List size={15} /> Table
+              </button>
+            </div>
+            <button className="btn btn-primary" onClick={handleOpenAdd}>
+              + Add Property
+            </button>
+          </div>
         }
       />
 
@@ -255,19 +275,19 @@ export default function OwnerPropertiesPage() {
           <div className="view-toggle-wrap" style={{ marginLeft: 'auto' }}>
             <button
               type="button"
-              className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
-              onClick={() => setViewMode('table')}
-              title="Table View"
-            >
-              <List size={15} /> Table
-            </button>
-            <button
-              type="button"
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
               title="Grid View"
             >
               <LayoutGrid size={15} /> Grid
+            </button>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+              onClick={() => setViewMode('table')}
+              title="Table View"
+            >
+              <List size={15} /> Table
             </button>
           </div>
         </div>
